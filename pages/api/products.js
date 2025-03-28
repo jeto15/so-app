@@ -17,8 +17,13 @@ export default async function handler(req, res) {
 
 // Get all products
 const getProducts = async (req, res) => {
-  try {
-    const [rows] = await pool.query("SELECT * FROM products");
+  try { 
+    const { searchKey = ""} = req.query;
+  
+    const [rows] = await pool.query("SELECT * FROM products Where product_details Like ? limit 50",[
+      `%${searchKey}%`
+    ]);
+
     return res.status(200).json(rows);
   } catch (error) {
     return res.status(500).json({ error: error.message });

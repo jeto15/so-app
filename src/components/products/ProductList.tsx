@@ -92,30 +92,27 @@ export default function ProductList(  ) {
     closeModal();
   };
 
-
- 
-  useEffect(() => {
-    const fetchProducts = async () => {
+  const fetchProducts = async ( searchKey = "" ) => {
       try {
-        const response = await axios.get("/api/products");
-        console.log(response.data);
+        console.log('searchKeysearchKey',searchKey);
+        const response = await axios.get("/api/products",{ params: { searchKey  }});
+        //console.log(response.data);
         setProducts(response.data);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
-    };
-    fetchProducts();
+  };
+  useEffect(() => {
+  
+    fetchProducts( );
   }, []);
 
-  const filteredProducts = products.filter((product) =>
-    product.product_details.toLowerCase().includes(search.toLowerCase()) ||
-    product.product_category.toLowerCase().includes(search.toLowerCase()) ||
-    product.product_code.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredProducts = products;
 
 
    // Function to handle voice input
-   const handleVoiceSearch = () => {
+  const handleVoiceSearch = () => {
+
     const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
     
     recognition.lang = "en-US"; // Set language
@@ -133,6 +130,10 @@ export default function ProductList(  ) {
       console.error("Speech recognition error", event.error);
     };
   };
+
+  const handleSearchProduct = (keyword) => { 
+    fetchProducts( keyword.target.value );
+  } 
   
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
@@ -156,14 +157,16 @@ export default function ProductList(  ) {
       </div>
       <div className="overflow-x-auto">
         <div className="d-flex">
-        <Input  type="text"
+          <Input  type="text"  placeholder="Search products..."  className="form-control mb-3 "  value={search}  onChange={handleSearchProduct} />
+
+       {/* <Input  type="text"
             placeholder="Search products..."
             className="form-control mb-3 "
             value={search}
-            onChange={(e) => setSearch(e.target.value)} />
+            onChange={(e) => setSearch(e.target.value)} /> */}
 
         </div>    
-        <div className="d-flex">
+        {/*<div className="d-flex">
             <input
               type="text"
               className="form-control"
@@ -174,7 +177,7 @@ export default function ProductList(  ) {
             <button className="btn btn-primary ms-2" onClick={handleVoiceSearch}>
               🎤
             </button>
-          </div>
+        </div>*/} 
       </div>
       <div className="max-w-full overflow-x-auto">
         <Table>
