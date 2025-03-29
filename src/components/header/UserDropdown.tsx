@@ -28,10 +28,12 @@ function toggleDropdown(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
       const token = document.cookie.split("; ").find(row => row.startsWith("token="))?.split("=")[1];
       if (!token) return router.push("/signin");
 
-      fetch("/api/auth/me", { headers: { Authorization: `Bearer ${token}` } })
+       fetch("/api/auth/me", { headers: { Authorization: `Bearer ${token}` } })
           .then(res => res.json())
           .then(data => setUser(data.user));
-  }, []);
+
+     
+      }, []);
 
   const handleLogout = async () => {
       await fetch("/api/auth/logout");
