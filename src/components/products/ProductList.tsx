@@ -8,23 +8,18 @@ import {
   TableCell,
   TableHeader,
   TableRow,
-} from "../ui/table";
-import Badge from "../ui/badge/Badge";
-import Image from "next/image";
-
+} from "../ui/table"; 
 import Input from "../form/input/InputField";
 import { useModal } from "../../hooks/useModal";
 import { Modal } from "../ui/modal";
 
-import { BoxIcon, PencilIcon,TrashBinIcon } from "@/icons";
+import { PencilIcon,TrashBinIcon } from "@/icons";
 import Button from "../ui/button/Button"; 
 import Label from "../form/Label";
  
 export default function ProductList(  ) {
-  const [products, setProducts] = useState([]);
-  const [search, setSearch] = useState("");
-  const { isOpen, openModal, closeModal } = useModal();
-  const [query, setQuery] = useState("");
+  const [products, setProducts] = useState([]); 
+  const { isOpen, openModal, closeModal } = useModal(); 
   const [searchVoice, setSearchVoice] = useState("");
   const [labelProdisCreate,setLabelProdisCreate]  = useState("");
 

@@ -6,8 +6,7 @@ import Button from "@/components/ui/button/Button";
 import { EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
 import React, { useState } from "react";
-
-import axios from "axios";
+ 
 import { useRouter } from "next/navigation";
 
 export default function SignInForm() {
@@ -24,19 +23,19 @@ export default function SignInForm() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
     });
-
+  
     const data = await res.json();
     if (res.ok) {
-        document.cookie = `token=${data.token}; path=/`;
-        router.push("/");
+      document.cookie = `token=${data.token}; path=/`;
+      router.push("/");
     } else {
-        alert("Login failed!");
+      setError("Invalid username or password");
     }
-};
+  };
 
 
   
@@ -68,7 +67,7 @@ export default function SignInForm() {
                   <Label>
                     Username <span className="text-error-500">*</span>{" "}
                   </Label>
-                  <Input type="text" className="form-control" value={username} onChange={(e) => setUsername(e.target.value)} required />
+                  <Input type="text" className="form-control" onChange={(e) => setUsername(e.target.value)} required />
  
                 </div>
                 <div>
@@ -77,7 +76,7 @@ export default function SignInForm() {
                   </Label>
                   <div className="relative">
             
-                    <Input  type={showPassword ? "text" : "password"} type="text" className="form-control" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                    <Input  type={showPassword ? "text" : "password"}   className="form-control"  onChange={(e) => setPassword(e.target.value)} required />
                     <span
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"

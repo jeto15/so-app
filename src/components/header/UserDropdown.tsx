@@ -4,36 +4,54 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
-
-import axios from "axios"; 
+ 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl?: string;
+}
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
 
-function toggleDropdown(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
-  e.stopPropagation();
-  setIsOpen((prev) => !prev);
-}
- 
+  function toggleDropdown(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+    e.stopPropagation();
+    setIsOpen((prev) => !prev);
+  }
+  
   function closeDropdown() {
     setIsOpen(false);
   }
  
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
-  
+   
   useEffect(() => {
-      const token = document.cookie.split("; ").find(row => row.startsWith("token="))?.split("=")[1];
-      if (!token) return router.push("/signin");
+    const token = document.cookie
+      .split("; ") 
+      .find(row => row.startsWith("token="))
+      ?.split("=")[1];
 
-       fetch("/api/auth/me", { headers: { Authorization: `Bearer ${token}` } })
-          .then(res => res.json())
-          .then(data => setUser(data.user));
+    if (!token) {
+      router.push("/signin");
+      return;
+    }
 
-     
-      }, []);
+    fetch("/api/auth/me", { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => res.json())
+      .then(data => {
+        if (data.user) {
+          setUser(data.user);
+        } else {
+          router.push("/signin");
+        }
+      })
+      .catch(() => router.push("/signin")); // Handle fetch errors
+  }, [router]);
 
   const handleLogout = async () => {
       await fetch("/api/auth/logout");
@@ -56,7 +74,7 @@ function toggleDropdown(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
           />
         </span>
 
-        <span className="block mr-1 font-medium text-theme-sm">Admin User</span>
+        <span className="block mr-1 font-medium text-theme-sm">Admin User {user?.email}</span>
 
         <svg
           className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${

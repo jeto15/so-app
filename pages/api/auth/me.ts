@@ -17,6 +17,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
     return res.status(200).json(decoded); // Send user info
   } catch (error) {
+    console.error("JWT verification error:", error);
     return res.status(401).json({ message: "Invalid Token" });
   }
 }
