@@ -9,23 +9,21 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import Badge from "../ui/badge/Badge";
-import Image from "next/image";
 
 import Input from "../form/input/InputField";
 import { useModal } from "../../hooks/useModal";
 import { Modal } from "../ui/modal";
 
-import { BoxIcon, PencilIcon,TrashBinIcon } from "@/icons";
+import { PencilIcon,TrashBinIcon } from "@/icons";
 import Button from "../ui/button/Button"; 
 import Label from "../form/Label";
  
+
+
 export default function ProductList(  ) {
-  const [products, setProducts] = useState([]);
-  const [search, setSearch] = useState("");
-  const { isOpen, openModal, closeModal } = useModal();
-  const [query, setQuery] = useState("");
-  const [searchVoice, setSearchVoice] = useState("");
+  const [products, setProducts] = useState([]); 
+  const { isOpen, openModal, closeModal } = useModal(); 
+  //const [searchVoice, setSearchVoice] = useState("");
   const [labelProdisCreate,setLabelProdisCreate]  = useState("");
 
   const [newProduct, setNewProduct] = useState(
@@ -49,8 +47,18 @@ export default function ProductList(  ) {
       srpPrice:0
     }
   );
-    
-  const filteredProducts = products;
+
+  type ProductObj = {
+    Id: string;  // Ensure this matches your actual API response
+    product_details: string;
+    product_code: string;
+    product_category: string;
+    product_cpt_price: number;
+    product_ws_price: number;
+    product_price: number;
+  };
+     
+  const filteredProducts: ProductObj[] = products;
 
   useEffect(() => {
     fetchProducts( );
@@ -71,7 +79,7 @@ export default function ProductList(  ) {
     setProdDetails(prodItems);  
   };
 
-  const handleSave = async (e) => {
+  const handleSave = async (e:  React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       console.log('newProduct', newProduct);
@@ -95,50 +103,62 @@ export default function ProductList(  ) {
       }
   };
  
-  const handleVoiceSearch = () => {
+  // const handleVoiceSearch = () => {
 
-    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  //   const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
     
-    recognition.lang = "en-US"; // Set language
-    recognition.start();
+  //   recognition.lang = "en-US"; // Set language
+  //   recognition.start();
 
-    recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      setSearchVoice(transcript);
-      fetchProducts( transcript.toLowerCase().replace(/\./g, "") );
+  //   recognition.onresult = (event) => {
+  //     const transcript = event.results[0][0].transcript;
+  //     setSearchVoice(transcript);
+  //     fetchProducts( transcript.toLowerCase().replace(/\./g, "") );
       
-      //onSearch(transcript); // Pass the recognized text to the search function
-    };
+  //     //onSearch(transcript); // Pass the recognized text to the search function
+  //   };
 
-    recognition.onerror = (event) => {
-      console.error("Speech recognition error", event.error);
-    };
-  };
+  //   recognition.onerror = (event) => {
+  //     console.error("Speech recognition error", event.error);
+  //   };
+  // };
 
   const handleSearchProduct = (keyword) => {  
     fetchProducts( keyword.target.value.toLowerCase() );
   } 
 
- 
-  const getProduct =  (id) => {
+  
+  const getProduct =  (id: string) => {
     try {
+
+      if (!filteredProducts || filteredProducts.length === 0) {
+        console.error('filteredProducts is empty or undefined');
+        return;
+      }
+
       openModal();
       setLabelProdisCreate('Update');
       const ProdID = id; 
-      const result = filteredProducts.filter(product => product.Id ===  ProdID);
-      
+      const result = filteredProducts.filter(resProd => (resProd as ProductObj).Id === ProdID);
+
+      if (result.length === 0) {
+        console.error('No matching product found');
+        return;
+      }
+  
+
       const prodItems = { 
-        productName: result[0].product_details,
-        productCode: result[0].product_code, 
-        productCategory: result[0].product_category,
-        cptPrice: result[0].product_cpt_price,
-        wlprice: result[0].product_ws_price,
-        srpPrice:result[0].product_price
+        productName: result[0].product_details ?? '',
+        productCode: result[0].product_code ?? '',
+        productCategory: result[0].product_category ?? '',
+        cptPrice: result[0].product_cpt_price ?? 0,
+        wlprice: result[0].product_ws_price ?? 0,
+        srpPrice: result[0].product_price ?? 0
       };
  
       setProdDetails(prodItems);  
     } catch (error) {
-      console.error('Error deleting product:', error); 
+      console.error('Error deleting product:', error);
     }
   };
 
@@ -150,11 +170,11 @@ export default function ProductList(  ) {
       <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="max-w-md">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            Search here  {searchVoice}
+            Search here  {/*searchVoice*/}
           </h3>
-          <Button size="sm" variant="outline" onClick={handleVoiceSearch}>
+          {/* <Button size="sm" variant="outline" onClick={handleVoiceSearch}>
             🎤 Speak to Search
-          </Button>
+          </Button> */}
         </div>
         <div className="flex items-center gap-3">
           <button  onClick={openFormModal} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
@@ -167,8 +187,7 @@ export default function ProductList(  ) {
           <Input 
             type="text"  
             placeholder="Search products..."  
-            className="form-control mb-3 "  
-            value={search}  
+            className="form-control mb-3 "    
             onChange={handleSearchProduct} 
           />
         </div>    
@@ -274,7 +293,7 @@ export default function ProductList(  ) {
               ))
             ) : (
               <tr>
-                <td colSpan="4" className="text-center">
+                <td colSpan={4} className="text-center">
                   No products found
                 </td>
               </tr>
@@ -300,8 +319,7 @@ export default function ProductList(  ) {
                   <div>
                     <Label>Product Category</Label>
                     <Input 
-                      type="text"  
-                      value={newProduct.productCategory}
+                      type="text"   
                       onChange={(e) => setNewProduct({ ...newProduct, productCategory: e.target.value })}
                       defaultValue={prodDetails.productCategory}
                      />
@@ -311,8 +329,7 @@ export default function ProductList(  ) {
                   <div>
                     <Label>Product Code</Label>
                     <Input 
-                      type="text"  
-                      value={newProduct.productCode}
+                      type="text"   
                       onChange={(e) => setNewProduct({ ...newProduct, productCode: e.target.value })}
                       defaultValue={prodDetails.productCode}
                       />
@@ -322,8 +339,7 @@ export default function ProductList(  ) {
                   <div>
                     <Label>Product Details</Label>
                     <Input 
-                      type="text" 
-                      value={newProduct.productName}
+                      type="text"  
                       onChange={(e) => setNewProduct({ ...newProduct, productName: e.target.value })}
                       defaultValue={prodDetails.productName} />
                   </div> 
@@ -333,9 +349,8 @@ export default function ProductList(  ) {
                   <Label>Capital Price</Label>
                   <Input 
                     type="number" 
-                    min="1" step="any" 
-                    value={newProduct.cptPrice}
-                    onChange={(e) => setNewProduct({ ...newProduct, cptPrice: e.target.value })}
+                    min="1"  
+                    onChange={(e) => setNewProduct({ ...newProduct, cptPrice:Number(e.target.value)  })}
                     defaultValue={prodDetails.cptPrice} />
                 </div>
 
@@ -343,10 +358,8 @@ export default function ProductList(  ) {
                   <Label>Wholesale Price</Label>
                   <Input 
                     type="number" 
-                    min="1" 
-                    step="any" 
-                    value={newProduct.wlprice}
-                    onChange={(e) => setNewProduct({ ...newProduct, wlprice: e.target.value })}
+                    min="1"  
+                    onChange={(e) => setNewProduct({ ...newProduct, wlprice: Number(e.target.value) })}
                     defaultValue={prodDetails.wlprice} />
                 </div>
 
@@ -354,10 +367,9 @@ export default function ProductList(  ) {
                   <Label>SRP Price</Label>
                   <Input 
                     type="number" 
-                    min="1" 
-                    value={newProduct.srpPrice}
-                    onChange={(e) => setNewProduct({ ...newProduct, srpPrice: e.target.value })}
-                    step="any" defaultValue={prodDetails.srpPrice} />
+                    min="1"  
+                    onChange={(e) => setNewProduct({ ...newProduct, srpPrice: Number(e.target.value) })}
+                    defaultValue={prodDetails.srpPrice} />
                 </div>
               </div>
             </div>
