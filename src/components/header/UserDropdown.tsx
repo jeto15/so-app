@@ -48,6 +48,7 @@ export default function UserDropdown() {
           setUser(data.user);
         } else {
           router.push("/signin");
+          
         }
       })
       .catch(() => router.push("/signin")); // Handle fetch errors
@@ -56,9 +57,9 @@ export default function UserDropdown() {
   const handleLogout = async () => {
       await fetch("/api/auth/logout");
       document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-      router.push("/signin");
+      window.location.href = "/";
   };
-
+ 
   return (
     <div className="relative">
       <button
