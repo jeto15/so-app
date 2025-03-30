@@ -123,7 +123,7 @@ export default function ProductList(  ) {
   //   };
   // };
 
-  const handleSearchProduct = (keyword) => {  
+  const handleSearchProduct = (keyword: React.ChangeEvent<HTMLInputElement>) => {  
     fetchProducts( keyword.target.value.toLowerCase() );
   } 
 
