@@ -14,9 +14,9 @@ import Input from "../form/input/InputField";
 import { useModal } from "../../hooks/useModal";
 import { Modal } from "../ui/modal";
 
-import { PencilIcon,TrashBinIcon } from "@/icons";
+import {   PencilIcon,TrashBinIcon } from "@/icons";
 import Button from "../ui/button/Button"; 
-import Label from "../form/Label";
+import Label from "../form/Label"; 
  
 
 
@@ -36,17 +36,7 @@ export default function ProductList(  ) {
       srpPrice:0
     }
   );
-  
-  const [prodDetails, setProdDetails] = useState(
-    { 
-      productName: '',
-      productCode: '', 
-      productCategory: '',
-      cptPrice: 0,
-      wlprice: 0,
-      srpPrice:0
-    }
-  );
+ 
 
   type ProductObj = {
     Id: string;  // Ensure this matches your actual API response
@@ -68,6 +58,7 @@ export default function ProductList(  ) {
     openModal();
     setLabelProdisCreate('Enter New');
     const prodItems = { 
+      Id :'', 
       productName: '',
       productCode: '', 
       productCategory: '',
@@ -76,14 +67,25 @@ export default function ProductList(  ) {
       srpPrice:0
     };
 
-    setProdDetails(prodItems);  
+    setNewProduct(prodItems);  
   };
 
   const handleSave = async (e:  React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      console.log('newProduct', newProduct);
-      await axios.post('/api/products', newProduct); 
+
+      const actionType = labelProdisCreate;
+
+      if( actionType == 'Update' ){  
+        
+        console.log('is update', newProduct  ); 
+        await axios.put('/api/products', newProduct); 
+ 
+      } else {
+        console.log('is', newProduct);
+        await axios.post('/api/products', newProduct); 
+      }
+
       fetchProducts();
       closeModal();
     } catch (error) {
@@ -102,7 +104,8 @@ export default function ProductList(  ) {
         console.error("Error fetching products:", error);
       }
   };
- 
+
+
   // const handleVoiceSearch = () => {
 
   //   const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
@@ -148,6 +151,7 @@ export default function ProductList(  ) {
   
 
       const prodItems = { 
+        Id: ProdID,
         productName: result[0].product_details ?? '',
         productCode: result[0].product_code ?? '',
         productCategory: result[0].product_category ?? '',
@@ -156,12 +160,17 @@ export default function ProductList(  ) {
         srpPrice: result[0].product_price ?? 0
       };
  
-      setProdDetails(prodItems);  
+      setNewProduct(prodItems);  
     } catch (error) {
       console.error('Error deleting product:', error);
     }
   };
 
+  const removeProduct = (id: string)=> {
+    alert('Sorry, You dont need this feature for now, Please take note and inform the Developer to manually remove this record to the system. Thank you');
+    console.log(id);
+  }; 
+  
   
 
   
@@ -200,21 +209,21 @@ export default function ProductList(  ) {
               <TableCell
                 isHeader
                 className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-              >
+              > 
                 Category
               </TableCell>
               <TableCell
                 isHeader
                 className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
-                Products
+                Products Code
               </TableCell>
               <TableCell
                 isHeader
                 className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
-                Wholesale Price
-              </TableCell> 
+                Products Details
+              </TableCell>
               <TableCell
                 isHeader
                 className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
@@ -225,7 +234,14 @@ export default function ProductList(  ) {
                 isHeader
                 className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
-                SRP Price
+                Wholesale Price
+              </TableCell> 
+     
+              <TableCell
+                isHeader
+                className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+              >
+                Retail Price
               </TableCell> 
               <TableCell
                 isHeader
@@ -245,31 +261,33 @@ export default function ProductList(  ) {
               filteredProducts.map((product) => (
 
                 <TableRow key={product.Id} className="">
-                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                  {product.product_category}
+                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400"> 
+                  <span className="text-gray-500 text-theme-xs dark:text-gray-400">
+                        {product.product_category}
+                    </span>
                 </TableCell>
                 <TableCell className="py-3">
-                  <div className="flex items-center gap-3">
-                    <div>
+                  <div className="flex items-center gap-3"> 
                       <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
                         {product.product_code}
-                      </p>
-                      <span className="text-gray-500 text-theme-xs dark:text-gray-400">
-                        {product.product_details}
-                      </span>
-                    </div>
+                      </p>  
                   </div>
                 </TableCell>
-                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                  <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                    {product.product_ws_price}
-                  </p> 
+                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400"> 
+                    <span className="text-gray-500 text-theme-xs dark:text-gray-400">
+                        {product.product_details}
+                    </span>
                 </TableCell>
                 <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400"> 
                   <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
                     {product.product_cpt_price}
                   </p>
                 </TableCell>
+                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                  <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
+                    {product.product_ws_price}
+                  </p> 
+                </TableCell> 
                 <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400"> 
                   <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
                     {product.product_price}
@@ -278,15 +296,14 @@ export default function ProductList(  ) {
                 <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400"> 
 
                   <div className="flex gap-5">
-                    <Button size="sm" variant="primary" endIcon={<PencilIcon />}  onClick={() => getProduct(product.Id)}  >
-                      Edit
-                    </Button>
-                    <Button size="sm" variant="outline" endIcon={<TrashBinIcon />}>
-                      Remove
-                    </Button>
+                    <button    onClick={() => getProduct(product.Id)}  >
+                      <PencilIcon />
+                    </button>
+                    <button  onClick={() => removeProduct(product.Id)}  >
+                      <TrashBinIcon />
+                    </button>
                   </div>
-
-                  
+ 
                 </TableCell>
               </TableRow>
 
@@ -317,11 +334,11 @@ export default function ProductList(  ) {
             <div className="px-2 overflow-y-auto custom-scrollbar">
              <div className="py-2 grid grid-cols-1 gap-x-6 gap-y-5 ">
                   <div>
-                    <Label>Product Category</Label>
+                    <Label> Product Category</Label>
                     <Input 
-                      type="text"   
+                      type="text"    
                       onChange={(e) => setNewProduct({ ...newProduct, productCategory: e.target.value })}
-                      defaultValue={prodDetails.productCategory}
+                      defaultValue={newProduct.productCategory}
                      />
                   </div>
              </div>
@@ -331,7 +348,7 @@ export default function ProductList(  ) {
                     <Input 
                       type="text"   
                       onChange={(e) => setNewProduct({ ...newProduct, productCode: e.target.value })}
-                      defaultValue={prodDetails.productCode}
+                      defaultValue={newProduct.productCode}
                       />
                   </div>
               </div>
@@ -339,9 +356,9 @@ export default function ProductList(  ) {
                   <div>
                     <Label>Product Details</Label>
                     <Input 
-                      type="text"  
+                      type="text"   
                       onChange={(e) => setNewProduct({ ...newProduct, productName: e.target.value })}
-                      defaultValue={prodDetails.productName} />
+                      defaultValue={newProduct.productName} />
                   </div> 
               </div>
               <div className="py-2 grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
@@ -351,7 +368,7 @@ export default function ProductList(  ) {
                     type="number" 
                     min="1"  
                     onChange={(e) => setNewProduct({ ...newProduct, cptPrice:Number(e.target.value)  })}
-                    defaultValue={prodDetails.cptPrice} />
+                    defaultValue={newProduct.cptPrice} />
                 </div>
 
                 <div>
@@ -360,7 +377,7 @@ export default function ProductList(  ) {
                     type="number" 
                     min="1"  
                     onChange={(e) => setNewProduct({ ...newProduct, wlprice: Number(e.target.value) })}
-                    defaultValue={prodDetails.wlprice} />
+                    defaultValue={newProduct.wlprice} />
                 </div>
 
                 <div>
@@ -369,7 +386,7 @@ export default function ProductList(  ) {
                     type="number" 
                     min="1"  
                     onChange={(e) => setNewProduct({ ...newProduct, srpPrice: Number(e.target.value) })}
-                    defaultValue={prodDetails.srpPrice} />
+                    defaultValue={newProduct.srpPrice} />
                 </div>
               </div>
             </div>

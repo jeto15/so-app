@@ -30,25 +30,8 @@ const getProducts = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
-
-
-// Add a new product
-// const addProduct = async (req, res) => {
-//   try {
-//     const { name, price, stock } = req.body;
-//     if (!name || !price || !stock) {
-//       return res.status(400).json({ message: "Missing fields" });
-//     }
-
-//     const [result] = await pool.query("INSERT INTO products (name, price, stock) VALUES (?, ?, ?)", 
-//       [name, price, stock]);
-
-//     return res.status(201).json({ id: result.insertId, name, price, stock });
-//   } catch (error) {
-//     return res.status(500).json({ error: error.message });
-//   }
-// };
-
+ 
+ 
 const addProduct = async (req, res) => {
   try {
     const {
@@ -59,17 +42,7 @@ const addProduct = async (req, res) => {
       cptPrice, 
       wlprice
     } = req.body; 
-
-    console.log({
-      productName,
-      productCode,  
-      productCategory,  // Fixed typo
-      srpPrice,         // This should be the product_price
-      cptPrice, 
-      wlprice
-    });
-
-   
+ 
 
     const category = productCategory?.trim() || "Uncategorized";
   
@@ -107,15 +80,46 @@ const addProduct = async (req, res) => {
 // Update a product
 const updateProduct = async (req, res) => {
   try {
-    const { id, name, price, stock } = req.body;
-    if (!id || !name || !price || !stock) {
-      return res.status(400).json({ message: "Missing fields" });
-    }
+    const {
+      Id,
+      productName,
+      productCode,  
+      productCategory,  // Fixed typo
+      srpPrice,         // This should be the product_price
+      cptPrice, 
+      wlprice
+    } = req.body;
 
-    await pool.query("UPDATE products SET name=?, price=?, stock=? WHERE id=?", 
-      [name, price, stock, id]);
+    console.log({
+      Id,
+      productName,
+      productCode,  
+      productCategory,  // Fixed typo
+      srpPrice,         // This should be the product_price
+      cptPrice, 
+      wlprice
+    });
 
-    return res.status(200).json({ id, name, price, stock });
+    const category = productCategory?.trim() || "Uncategorized";
+  
+    const srp = parseFloat(srpPrice) || 0;
+    const cpt = parseFloat(cptPrice) || 0;
+    const wl = parseFloat(wlprice) || 0;
+ 
+    const [result] = await pool.query(
+      "UPDATE products SET product_details=?, product_code=?, product_price=?, product_cpt_price=?, product_ws_price=?, product_category=? WHERE id=?", 
+      [productName, productCode, srp, cpt, wl, category, Id] // Ensure the order matches
+    );
+   
+    return res.status(201).json({ 
+      id: result.insertId, 
+      productName,  
+      productCode,  
+      productCategory, // Fixed typo
+      srpPrice, 
+      cptPrice,   
+      wlprice 
+    }); 
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
