@@ -25,9 +25,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         
         if (password !== user.password) {
           return res.status(401).json({ error: "Invalid username or password" });
-        }
+        }   
 
-        const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET!, { expiresIn: "1h" });
+        console.log('jwt here',{ id: user.id, role: user.role });
+
+        const token = jwt.sign({ id: user.id, name:user.username, role: user.role }, process.env.JWT_SECRET!, { expiresIn: "1h" });
 
         res.status(200).json({ token });
     } catch (error) {

@@ -9,9 +9,8 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 interface User {
-  id: string;
-  name: string;
-  email: string;
+  id: string; 
+  username: string;
   avatarUrl?: string;
 }
 
@@ -44,8 +43,10 @@ export default function UserDropdown() {
     fetch("/api/auth/me", { headers: { Authorization: `Bearer ${token}` } })
       .then(res => res.json())
       .then(data => {
-        if (data.user) {
-          setUser(data.user);
+        console.log('data.user=>',data);
+        if (data) {
+          console.log('In is Data.user',data.user);
+          setUser(data);
         } else {
           router.push("/signin");
           
@@ -73,9 +74,9 @@ export default function UserDropdown() {
             src="/images/user/user-02.jpg"
             alt="User"
           />
-        </span>
+        </span> 
 
-        <span className="block mr-1 font-medium text-theme-sm">Admin User {user?.email}</span>
+        <span className="block mr-1 font-medium text-theme-sm">Admin User {user?.username}</span>
 
         <svg
           className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${
