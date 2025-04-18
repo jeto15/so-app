@@ -4,8 +4,7 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
- 
-import { useRouter } from "next/navigation";
+  
 import { useEffect } from "react";
 
 interface User {
@@ -27,33 +26,30 @@ export default function UserDropdown() {
   }
  
   const [user, setUser] = useState<User | null>(null);
-  const router = useRouter();
-   
-  useEffect(() => {
-    const token = document.cookie
-      .split("; ") 
-      .find(row => row.startsWith("token="))
-      ?.split("=")[1];
+ 
 
-    if (!token) {
-      router.push("/signin");
-      return;
+  const fetchUserData = async () => {
+    try {
+      const res = await fetch('/api/auth/me');
+      const data = await res.json();
+
+      if (res.status === 401 && data.redirectTo) {
+        // Redirect to the signin page
+        await fetch("/api/auth/logout");
+        document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+        window.location.href = "/";
+      } else {
+        console.log('User Data:', data); // Proceed with your logic
+        setUser(data);
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
     }
+  }; 
 
-    fetch("/api/auth/me", { headers: { Authorization: `Bearer ${token}` } })
-      .then(res => res.json())
-      .then(data => {
-        console.log('data.user=>',data);
-        if (data) {
-          console.log('In is Data.user',data.user);
-          setUser(data);
-        } else {
-          router.push("/signin");
-          
-        }
-      })
-      .catch(() => router.push("/signin")); // Handle fetch errors
-  }, [router]);
+  useEffect(() => {
+    fetchUserData();
+  }, []);
 
   const handleLogout = async () => {
       await fetch("/api/auth/logout");

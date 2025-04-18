@@ -8,7 +8,7 @@ import RecentOrders from "@/components/ecommerce/RecentOrders";
 import DemographicCard from "@/components/ecommerce/DemographicCard";
 
 export const metadata: Metadata = {
-  title: "Steven Ortega Inventory",
+  title: "Dashoard | Steven Ortega Consumer Goods Trading",
   description: "This will manage the poducts",
 };
 
