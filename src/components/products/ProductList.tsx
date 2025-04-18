@@ -17,7 +17,7 @@ import { Modal } from "../ui/modal";
 import {   PencilIcon,TrashBinIcon } from "@/icons";
 import Button from "../ui/button/Button"; 
 import Label from "../form/Label"; 
- 
+import CategoryInput from "../customs/CategoryInput"; 
 
 
 export default function ProductList(  ) {
@@ -47,8 +47,7 @@ export default function ProductList(  ) {
     product_ws_price: number;
     product_price: number;
   };
-     
-  const filteredProducts: ProductObj[] = products;
+
 
   useEffect(() => {
     fetchProducts( );
@@ -76,13 +75,9 @@ export default function ProductList(  ) {
 
       const actionType = labelProdisCreate;
 
-      if( actionType == 'Update' ){  
-        
-        console.log('is update', newProduct  ); 
-        await axios.put('/api/products', newProduct); 
- 
-      } else {
-        console.log('is', newProduct);
+      if( actionType == 'Update' ){   
+        await axios.put('/api/products', newProduct);  
+      } else { 
         await axios.post('/api/products', newProduct); 
       }
 
@@ -171,9 +166,14 @@ export default function ProductList(  ) {
     console.log(id);
   }; 
   
-  
+  const handleCategoryChange = (value = "") => {
+    console.log('Selected category:', value);
+    // Do something with it (e.g., store in form state)
+    setNewProduct({ ...newProduct, productCategory: value });
+  }; 
 
-  
+       
+  const filteredProducts: ProductObj[] = products;
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
       <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
@@ -199,6 +199,7 @@ export default function ProductList(  ) {
             className="form-control mb-3 "    
             onChange={handleSearchProduct} 
           />
+       
         </div>    
       </div>
       <div className="max-w-full overflow-x-auto">
@@ -335,12 +336,18 @@ export default function ProductList(  ) {
              <div className="py-2 grid grid-cols-1 gap-x-6 gap-y-5 ">
                   <div>
                     <Label> Product Category</Label>
-                    <Input 
+ 
+                    {/* <Input 
                       type="text"    
                       onChange={(e) => setNewProduct({ ...newProduct, productCategory: e.target.value })}
                       defaultValue={newProduct.productCategory}
-                     />
-                  </div>
+                     /> */}
+
+                    <CategoryInput 
+                       onChange={handleCategoryChange}
+                        defaultValue={newProduct.productCategory}
+                    />
+                  </div> 
              </div>
              <div className="py-2 grid grid-cols-1 gap-x-6 gap-y-5 ">
                   <div>

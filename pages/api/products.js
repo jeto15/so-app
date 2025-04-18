@@ -20,11 +20,24 @@ const getProducts = async (req, res) => {
   try { 
 
     const { searchKey = ""} = req.query;
-  
-    const [rows] = await pool.query("SELECT * FROM products Where LOWER(product_details) Like ? OR LOWER(product_code) Like ? OR LOWER(product_category) Like ?  ORDER BY Id DESC limit 20",[
-      `%${searchKey}%`,`%${searchKey}%`,`%${searchKey}%`
-    ]);
+    let rows;
 
+    if (searchKey.trim() === '') {
+      [rows] = await pool.query(
+        'SELECT * FROM products ORDER BY Id DESC LIMIT 20'
+      );
+    } else {
+      const search = `%${searchKey.toLowerCase()}%`;
+      [rows] = await pool.query(
+        `SELECT * FROM products 
+         WHERE LOWER(product_details) LIKE ? 
+           OR LOWER(product_code) LIKE ? 
+           OR LOWER(product_category) LIKE ? 
+         ORDER BY Id DESC LIMIT 20`,
+        [search, search, search]
+      );
+    }
+ 
     return res.status(200).json(rows);
   } catch (error) {
     return res.status(500).json({ error: error.message });
