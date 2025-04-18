@@ -27,7 +27,13 @@ const navItems: NavItem[] = [
     icon: <TableIcon />,
     name: "Products",
     path: "/products",
-  }
+  },
+  {
+    icon: <TableIcon />,
+    name: "Locations",
+    path: "/locations",
+  },
+  
  
 ];
 

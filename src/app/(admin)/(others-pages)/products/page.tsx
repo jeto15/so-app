@@ -5,7 +5,7 @@ import React from "react";
 
 
 export const metadata: Metadata = {
-  title: "Steven Ortega Inventory",
+  title: "Products | Steven Ortega Consumer Goods Trading",
   description: "This will manage the poducts",
 };
 
