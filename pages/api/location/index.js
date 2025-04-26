@@ -51,13 +51,8 @@ const addLocations = async (req, res) => {
         SELECT Id, product_details
         FROM products   
       ` 
-    ); 
- 
-
-    const productRows = prodRows;
- 
-
-    // const category = productCategory?.trim() || "Uncategorized";
+    );  
+    const productRows = prodRows; 
 
     const [result] = await pool.query(
       "INSERT INTO locations (name, address) VALUES (?, ?)", 

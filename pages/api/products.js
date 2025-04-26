@@ -19,24 +19,48 @@ export default async function handler(req, res) {
 const getProducts = async (req, res) => {
   try { 
 
-    const { searchKey = ""} = req.query;
+    const { searchKey = "", viewMode = ""} = req.query;
     let rows;
 
-    if (searchKey.trim() === '') {
-      [rows] = await pool.query(
-        'SELECT * FROM products ORDER BY Id DESC LIMIT 20'
-      );
+    if( viewMode === 'all' ){
+
+        
+      if (searchKey.trim() === '') {
+        [rows] = await pool.query(
+          'SELECT * FROM products ORDER BY product_category ASC'
+        );
+      } else {
+        const search = `%${searchKey.toLowerCase()}%`;
+        [rows] = await pool.query(
+          `SELECT * FROM products 
+          WHERE LOWER(product_details) LIKE ? 
+            OR LOWER(product_code) LIKE ? 
+            OR LOWER(product_category) LIKE ? 
+          ORDER BY product_category ASC`,
+          [search, search, search]
+        );
+      }
+
     } else {
-      const search = `%${searchKey.toLowerCase()}%`;
-      [rows] = await pool.query(
-        `SELECT * FROM products 
-         WHERE LOWER(product_details) LIKE ? 
-           OR LOWER(product_code) LIKE ? 
-           OR LOWER(product_category) LIKE ? 
-         ORDER BY Id DESC LIMIT 20`,
-        [search, search, search]
-      );
+      
+      if (searchKey.trim() === '') {
+        [rows] = await pool.query(
+          'SELECT * FROM products ORDER BY product_category ASC LIMIT 20'
+        );
+      } else {
+        const search = `%${searchKey.toLowerCase()}%`;
+        [rows] = await pool.query(
+          `SELECT * FROM products 
+          WHERE LOWER(product_details) LIKE ? 
+            OR LOWER(product_code) LIKE ? 
+            OR LOWER(product_category) LIKE ? 
+          ORDER BY product_category ASC LIMIT 20`,
+          [search, search, search]
+        );
+      }
+
     }
+
  
     return res.status(200).json(rows);
   } catch (error) {
