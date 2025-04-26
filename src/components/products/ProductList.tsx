@@ -14,17 +14,26 @@ import Input from "../form/input/InputField";
 import { useModal } from "../../hooks/useModal";
 import { Modal } from "../ui/modal";
 
-import {   PencilIcon,TrashBinIcon } from "@/icons";
+import {   PencilIcon,TrashBinIcon, EyeIcon } from "@/icons";
 import Button from "../ui/button/Button"; 
 import Label from "../form/Label"; 
 import CategoryInput from "../customs/CategoryInput"; 
 
+import { useSearchParams } from 'next/navigation'; 
+
 
 export default function ProductList(  ) {
+
+  const searchParams = useSearchParams();
+  const viewMode = searchParams?.get('v') ?? ''; // Fallback to a default value if 'id' is null
+  
+   
+
   const [products, setProducts] = useState([]); 
   const { isOpen, openModal, closeModal } = useModal(); 
   //const [searchVoice, setSearchVoice] = useState("");
   const [labelProdisCreate,setLabelProdisCreate]  = useState("");
+  const [prodcountresult, setProdcountresult] = useState(0);
 
   const [newProduct, setNewProduct] = useState(
     { 
@@ -50,8 +59,8 @@ export default function ProductList(  ) {
 
 
   useEffect(() => {
-    fetchProducts( );
-  }, []); 
+    fetchProducts();
+  }, [viewMode]);  
 
   const openFormModal = ()=> {
     openModal();
@@ -91,10 +100,12 @@ export default function ProductList(  ) {
 
   const fetchProducts = async ( searchKey = "" ) => {
       try { 
-
-        const response = await axios.get("/api/products",{ params: { searchKey  }});
+        console.log('viewMode', viewMode); 
+        const response = await axios.get("/api/products",{ params: { searchKey , viewMode  }});
         //console.log(response.data);
         setProducts(response.data); 
+
+        setProdcountresult( response.data.length  );
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -179,13 +190,19 @@ export default function ProductList(  ) {
       <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="max-w-md">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            Search here  {/*searchVoice*/}
+            Search here  ( result : {prodcountresult} ){/*searchVoice*/}
           </h3>
           {/* <Button size="sm" variant="outline" onClick={handleVoiceSearch}>
             🎤 Speak to Search
           </Button> */}
         </div>
         <div className="flex items-center gap-3">
+          <a href="?v=" className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
+            Show less
+          </a> 
+          <a href="?v=all" className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
+            Show All
+          </a> 
           <button  onClick={openFormModal} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
             Add New Product
           </button>
@@ -209,44 +226,44 @@ export default function ProductList(  ) {
             <TableRow>
               <TableCell
                 isHeader
-                className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                className="py-1 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               > 
                 Category
               </TableCell>
               <TableCell
                 isHeader
-                className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                className="py-1 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
                 Products Code
               </TableCell>
               <TableCell
                 isHeader
-                className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                className="py-1 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
                 Products Details
               </TableCell>
               <TableCell
                 isHeader
-                className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                className="py-1 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
                 Capital Price
               </TableCell> 
               <TableCell
                 isHeader
-                className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                className="py-1 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
                 Wholesale Price
               </TableCell> 
      
               <TableCell
                 isHeader
-                className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                className="py-1 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
                 Retail Price
               </TableCell> 
               <TableCell
                 isHeader
-                className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400 min-w-min"
+                className="py-1 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400 min-w-min"
               >
                 Action
               </TableCell> 
@@ -262,41 +279,44 @@ export default function ProductList(  ) {
               filteredProducts.map((product) => (
 
                 <TableRow key={product.Id} className="">
-                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400"> 
+                <TableCell className="py-1 text-gray-500 text-theme-sm dark:text-gray-400"> 
                   <span className="text-gray-500 text-theme-xs dark:text-gray-400">
                         {product.product_category}
                     </span>
                 </TableCell>
-                <TableCell className="py-3">
+                <TableCell className="py-1">
                   <div className="flex items-center gap-3"> 
-                      <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
+                      <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90"> 
                         {product.product_code}
                       </p>  
                   </div>
                 </TableCell>
-                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400"> 
+                <TableCell className="py-1 text-gray-500 text-theme-sm dark:text-gray-400"> 
                     <span className="text-gray-500 text-theme-xs dark:text-gray-400">
                         {product.product_details}
                     </span>
                 </TableCell>
-                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400"> 
+                <TableCell className="py-1 text-gray-500 text-theme-sm dark:text-gray-400"> 
                   <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
                     {product.product_cpt_price}
                   </p>
                 </TableCell>
-                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                <TableCell className="py-1 text-gray-500 text-theme-sm dark:text-gray-400">
                   <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
                     {product.product_ws_price}
                   </p> 
                 </TableCell> 
-                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400"> 
+                <TableCell className="py-1 text-gray-500 text-theme-sm dark:text-gray-400"> 
                   <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
                     {product.product_price}
                   </p>
                 </TableCell>
-                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400"> 
+                <TableCell className="py-1 text-gray-500 text-theme-sm dark:text-gray-400"> 
 
                   <div className="flex gap-5">
+                    <a href={`/products/product-record?id=${product.Id}`} target="_blank">
+                        <EyeIcon       /> 
+                    </a> 
                     <button    onClick={() => getProduct(product.Id)}  >
                       <PencilIcon />
                     </button>
@@ -372,8 +392,7 @@ export default function ProductList(  ) {
                 <div> 
                   <Label>Capital Price</Label>
                   <Input 
-                    type="number" 
-                    min="1"  
+                    type="number"  
                     onChange={(e) => setNewProduct({ ...newProduct, cptPrice:Number(e.target.value)  })}
                     defaultValue={newProduct.cptPrice} />
                 </div>
@@ -381,8 +400,7 @@ export default function ProductList(  ) {
                 <div>
                   <Label>Wholesale Price</Label>
                   <Input 
-                    type="number" 
-                    min="1"  
+                    type="number"  
                     onChange={(e) => setNewProduct({ ...newProduct, wlprice: Number(e.target.value) })}
                     defaultValue={newProduct.wlprice} />
                 </div>
@@ -390,8 +408,7 @@ export default function ProductList(  ) {
                 <div>
                   <Label>SRP Price</Label>
                   <Input 
-                    type="number" 
-                    min="1"  
+                    type="number"  
                     onChange={(e) => setNewProduct({ ...newProduct, srpPrice: Number(e.target.value) })}
                     defaultValue={newProduct.srpPrice} />
                 </div>
