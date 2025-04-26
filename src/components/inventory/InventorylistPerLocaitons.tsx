@@ -9,7 +9,7 @@ import axios from "axios";
 import {
   Table,
   TableBody,
-  TableCell,
+  TableCell, 
   TableHeader,
   TableRow,
 } from "../ui/table";
@@ -18,7 +18,7 @@ import Input from "../form/input/InputField";
 
 import Label from "../form/Label";
 
-
+import {EyeIcon } from "@/icons";
 import SupplierInput from "../customs/SupplierInputs";
 
  
@@ -50,6 +50,9 @@ export default function InventorylistPerLocaitons() {
   const [supplierId, setSupplierId] = useState(String);
   //Stock in states
   const [quantities, setQuantities] = useState<Record<number, number>>({});
+  const [customerName, setCustomerName] = useState('');
+ 
+  const [transactoinError, setTransactionError] = useState(String);
 
 
   useEffect(() => { 
@@ -111,10 +114,14 @@ export default function InventorylistPerLocaitons() {
   
 
   const handleSelect = (item: ProductObj) => {
+
+    console.log('ProductObj',item);
+
     const alreadySelected = selectedItems.find((i) => i.Id === item.Id);
     if (!alreadySelected) {
       setSelectedItems([...selectedItems, item]);
     }
+     
   };
   
   const handleRemove = (Id: string) => {
@@ -157,6 +164,7 @@ export default function InventorylistPerLocaitons() {
             description: descriptions, 
             supplierId: supId,
             productId: product.Id,  
+            customername: customerName, 
             quantity: quantities[parseInt(product.Id)] || 0,
           }
         )).filter((item) => item.quantity > 0); 
@@ -172,8 +180,20 @@ export default function InventorylistPerLocaitons() {
         setActionType('');
 
         closeModal(); 
+        setTransactionError(''); 
+
     } catch (error) {
-        console.error('Error adding product:', error);
+        
+       
+
+        if (axios.isAxiosError(error)) {
+          const errorMessage = error.response?.data?.error; 
+
+          setTransactionError(errorMessage); 
+          // you can also set it to state or show in UI
+        } else {
+          console.error('Unexpected Error:', error);
+        }
        // setError('Failed to add product. Please try again.');
     }
   }
@@ -185,26 +205,40 @@ export default function InventorylistPerLocaitons() {
     }));
   };
  
+ 
   const openModalStockIn =() =>{
     setActionType("Stock In");
+    setTransactionError('');
+    setCustomerName('');
     openModal();
   }
 
   const openModalStockOut =() =>{
     setActionType("Stock Out");
+    setTransactionError('');
+    setCustomerName('');
     openModal();
 
   }
 
   const openModalStockPurchase =() =>{
     setActionType("Purchase");
+    setTransactionError('');
+    setCustomerName(''); 
     openModal();
   }
   const openModalStockSales =() =>{
     setActionType("Sale");
+    setTransactionError('');
     openModal();
 
   }
+
+  const handleEnterCustomer = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    console.log('Typed value:', value); // ✅ you get the value here
+    setCustomerName(value);
+  };
 
   const filteredProducts: ProductObj[] = products;
   return (
@@ -222,28 +256,28 @@ export default function InventorylistPerLocaitons() {
                         
             <button
             onClick={openModalStockPurchase}
-            className=" flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto m-2"
+            className="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition  px-4 py-3 text-sm bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 m-1"
             > 
               Purchase 
             </button>
 
             <button
             onClick={openModalStockSales}
-            className=" flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto m-2"
+            className="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition  px-4 py-3 text-sm bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 m-1"
             > 
               Sale 
             </button>
 
             <button
             onClick={openModalStockIn}
-            className=" flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto m-2"
+            className="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition  px-4 py-3 text-sm bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300  m-1"
             > 
               Stock In 
             </button>
 
             <button 
             onClick={openModalStockOut}
-            className="flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto m-2"
+            className="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition  px-4 py-3 text-sm bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300  m-1"
             > 
               Stock Out 
             </button>
@@ -327,18 +361,23 @@ export default function InventorylistPerLocaitons() {
                 </TableCell>
                 <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400"> 
                   <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                    {product.quantity}{` < `}{product.reorder_level}
+                    {product.quantity} 
                   </p>
                 </TableCell>  
                 <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400"> 
 
                   <div className="flex gap-5">
+                  <a href={`/products/product-record?id=${product.Id}`} target="_blank">
+                        <EyeIcon       /> 
+                    </a> 
                     <button 
                       onClick={() => handleSelect(product)} 
                       className="inline-flex items-center px-2.5 py-0.5 justify-center gap-1 rounded-full font-medium text-sm bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400"    >
                         Select
                     </button>
 
+                    
+ 
                     {/* <button  onClick={() => removeProduct(product.Id)}  >
                       <TrashBinIcon />
                     </button> */}
@@ -366,7 +405,7 @@ export default function InventorylistPerLocaitons() {
             <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
               {actiontype}
             </h4> 
-              
+            {transactoinError && <div className="text-red-500 mt-2">{transactoinError}</div>} 
           </div> 
           <div className="flex flex-col">
             <div className="custom-scrollbar px-1 pb-3">
@@ -380,6 +419,23 @@ export default function InventorylistPerLocaitons() {
                       onChange={(selectedSupplier) => {
                         setSupplierId(selectedSupplier.id.toString());
                       }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+          {actiontype === 'Sale' && (
+              <div className="mt-7">
+                <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
+                  <div className="col-span-2 lg:col-span-1">
+                    <Label>Supplier is?</Label> 
+                    <Input 
+                      type="text"  
+                      placeholder="Customer name"  
+                      className="form-control mb-3 "    
+                      onChange={handleEnterCustomer} 
+                      defaultValue={customerName}
                     />
                   </div>
                 </div>
@@ -426,7 +482,6 @@ export default function InventorylistPerLocaitons() {
                                   Remove
                               </button> 
                             </div>
-
                             </TableCell>
                         </TableRow>
 
@@ -442,14 +497,17 @@ export default function InventorylistPerLocaitons() {
                     </TableBody>
                 </Table>
             </div>  
-            <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
-              <Button size="sm" variant="outline" onClick={closeModal}>
-                Close
-              </Button>
-              <Button size="sm" onClick={handlSaveTransaction} >
-                Save Changes
-              </Button>
-            </div>
+            {selectedItems.length > 0 && (
+              <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
+                <Button size="sm" variant="outline" onClick={closeModal}>
+                  Close
+                </Button>
+                <Button size="sm" onClick={handlSaveTransaction} >
+                  Save Changes
+                </Button>
+              </div>
+            )}
+
           </div>
         </div>
       </Modal>

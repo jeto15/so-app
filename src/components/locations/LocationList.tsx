@@ -34,6 +34,8 @@ export default function LocationList() {
     const [locations, setLocations] = useState([]); 
 
     const [labelLocationAction, setLabelLocationAction]= useState("");
+
+    const [error, setError] = useState<string | null>(null);
  
     useEffect(() => {
         fetchLocations( );
@@ -51,6 +53,7 @@ export default function LocationList() {
     }; 
 
     const openFormModal = ()=> {
+        setError(null); 
         openModal();
         setLabelLocationAction('Enter New');
 
@@ -66,26 +69,44 @@ export default function LocationList() {
 
     const handleSave = async (e:  React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setError(null); // Clear any previous error
         try{
           
             const actionType = labelLocationAction; 
 
             if( actionType == 'Update' ){
-                await axios.put('/api/location', locationInfo);  
+               await axios.put('/api/location', locationInfo);  
             } else {    
                 console.log(locationInfo);
-                await axios.post('/api/location', locationInfo);  
+                const response = await axios.post('/api/location', locationInfo);  
+
+                const result = response.data;
+ 
+                if (!result.success) {
+                    alert('hell word'); 
+                  throw new Error(result.message || 'Unknown error occurred');
+                }
+                console.log('Success!', result); 
+            
             } 
  
             fetchLocations();
             closeModal();
-        } catch (error) {
-            console.error('Error adding product:', error);
-           // setError('Failed to add product. Please try again.');
+        } catch  (err: unknown)  {
+            let errorMessage = 'Something went wrong';
+
+            if (axios.isAxiosError(err)) {
+              errorMessage = err.response?.data?.message || err.message;
+            } else if (err instanceof Error) {
+              errorMessage = err.message;
+            }
+          
+            setError(errorMessage);
         }
     }
 
     const getLocation =  (id: string) => {
+        setError(null); 
         try {
             
           if (!filterLocation || filterLocation.length === 0) {
@@ -201,6 +222,9 @@ export default function LocationList() {
                 </div>
  
                 <form onSubmit={handleSave} className="flex flex-col">
+                    { error !== '' && (
+                        <p className="mt-2 text-sm text-error-500">{error}</p>
+                    )}
                     <div className="px-2 overflow-y-auto custom-scrollbar"> 
                         <div className="py-2 grid grid-cols-1 gap-x-6 gap-y-5 ">
                             <div>

@@ -2,13 +2,9 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from 'next/navigation';
 import axios from "axios";
-
-
-import React from "react";
-import { useModal } from "../../../hooks/useModal";
+ 
+import React from "react"; 
 import InventorylistPerLocaitons from "../../inventory/InventorylistPerLocaitons";
-
-
 
  
 export default function LocationInfo() {
@@ -22,24 +18,24 @@ export default function LocationInfo() {
     };
 
     const [locationRecord, setLocationRecord] = useState([]); 
- 
-
-    useEffect(() => { 
-        fetchLocationRecord();   
-    }, []); 
-
- 
-    
-    const fetchLocationRecord = async () => {
-        try {  
-            const response = await axios.get("/api/location/"+id,{}); 
- 
-            setLocationRecord(response.data);
   
-          } catch (error) {
-            console.error("Error fetching products:", error);
-          }
-    }; 
+    useEffect(() => { 
+            
+        const fetchLocationRecord = async () => {
+            try {  
+                const response = await axios.get("/api/location/"+id,{}); 
+    
+                setLocationRecord(response.data);
+    
+            } catch (error) {
+                console.error("Error fetching products:", error);
+            }
+        }; 
+        
+        fetchLocationRecord();   
+    }, [id]); 
+ 
+
     
     const locRecord : locationsObj = locationRecord[0]; 
     return (
@@ -73,12 +69,8 @@ export default function LocationInfo() {
                         </div>
                     </div> 
                 </div>
-
-           
             </div>
- 
             <InventorylistPerLocaitons /> 
         </>
-
     );
 }    
