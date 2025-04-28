@@ -9,151 +9,131 @@ import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button"; 
 import Label from "../form/Label"; 
 
-import {  EyeIcon, PencilIcon,TrashBinIcon } from "@/icons";
+import {  EyeIcon, PencilIcon, TrashBinIcon } from "@/icons";
 
 import { useRouter } from 'next/navigation';
- 
+
 export default function LocationList() {
     const router = useRouter();
 
     type locationsObj = {
-        id: string;  // Ensure this matches your actual API response
+        id: string;
         name: string;
         address: string;
     };
 
-    const [locationInfo,setLocationInfo] = useState(
-        { 
-          name: '',
-          address: ''
-        }
-    );
- 
+    const [locationInfo, setLocationInfo] = useState({ 
+        name: '',
+        address: ''
+    });
+
     const { isOpen, openModal, closeModal } = useModal(); 
-
     const [locations, setLocations] = useState([]); 
-
-    const [labelLocationAction, setLabelLocationAction]= useState("");
-
+    const [labelLocationAction, setLabelLocationAction] = useState("");
     const [error, setError] = useState<string | null>(null);
- 
+    const [loading, setLoading] = useState(false);  // Add loading state
+
     useEffect(() => {
-        fetchLocations( );
+        fetchLocations();
     }, []); 
 
     const fetchLocations = async () => {
+        setLoading(true);  // Set loading to true when fetching
         try { 
-
-            const response = await axios.get("/api/location",{}); 
+            const response = await axios.get("/api/location", {}); 
             console.log(response.data);
             setLocations(response.data); 
-          } catch (error) {
+        } catch (error) {
             console.error("Error fetching products:", error);
-          }
-    }; 
+        } finally {
+            setLoading(false);  // Set loading to false once data is fetched
+        }
+    };
 
-    const openFormModal = ()=> {
+    const openFormModal = () => {
         setError(null); 
         openModal();
         setLabelLocationAction('Enter New');
-
         const locatItem = { 
             Id: '',
             name:  '',
             address: '', 
-          };
-     
+        };
         setLocationInfo(locatItem);  
-
     }
 
-    const handleSave = async (e:  React.FormEvent<HTMLFormElement>) => {
+    const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError(null); // Clear any previous error
-        try{
-          
+        setLoading(true);  // Set loading to true when saving
+        try {
             const actionType = labelLocationAction; 
-
-            if( actionType == 'Update' ){
-               await axios.put('/api/location', locationInfo);  
+            if (actionType === 'Update') {
+                await axios.put('/api/location', locationInfo);  
             } else {    
-                console.log(locationInfo);
                 const response = await axios.post('/api/location', locationInfo);  
-
-                const result = response.data;
- 
-                if (!result.success) {
-                    alert('hell word'); 
-                  throw new Error(result.message || 'Unknown error occurred');
+                const result = response.data;  
+                if (!result.success) { 
+                    setError(result.message);
+                    throw new Error(result.message || 'Unknown error occurred');
                 }
                 console.log('Success!', result); 
-            
             } 
  
             fetchLocations();
             closeModal();
-        } catch  (err: unknown)  {
+        } catch (err: unknown) {
             let errorMessage = 'Something went wrong';
-
             if (axios.isAxiosError(err)) {
-              errorMessage = err.response?.data?.message || err.message;
+                errorMessage = err.response?.data?.message || err.message;
             } else if (err instanceof Error) {
-              errorMessage = err.message;
+                errorMessage = err.message;
             }
-          
             setError(errorMessage);
+        } finally {
+            setLoading(false);  // Set loading to false after save operation
         }
     }
 
-    const getLocation =  (id: string) => {
+    const getLocation = (id: string) => {
         setError(null); 
         try {
-            
-          if (!filterLocation || filterLocation.length === 0) {
-            console.error('Locaiton is empty or undefined');
-            return;
-          }
+            if (!filterLocation || filterLocation.length === 0) {
+                console.error('Location is empty or undefined');
+                return;
+            }
     
-          openModal();
-          setLabelLocationAction('Update');
-          const locId = id; 
-          const result = filterLocation.filter(resLoc => (resLoc as locationsObj).id === locId);
- 
+            openModal();
+            setLabelLocationAction('Update');
+            const locId = id; 
+            const result = filterLocation.filter(resLoc => (resLoc as locationsObj).id === locId);
 
-          if (result.length === 0) {
-            console.error('No matching Location found');
-            return;
-          }
-      
+            if (result.length === 0) {
+                console.error('No matching Location found');
+                return;
+            }
     
-          const locatItem = { 
-            Id: locId,
-            name: result[0].name ?? '',
-            address: result[0].address ?? '', 
-          };
-           
-          setLocationInfo(locatItem);  
-
+            const locatItem = { 
+                Id: locId,
+                name: result[0].name ?? '',
+                address: result[0].address ?? '', 
+            };
+            setLocationInfo(locatItem);   
         } catch (error) {
             console.error('Error deleting product:', error);
         }
-
     }
 
     const viewLocation = (id: string) => {
         try {
-             
-            router.push('/locations/location-record?id='+id);
-
+            router.push('/locations/location-record?id=' + id);
         } catch (error) {
             console.error('Error deleting product:', error);
         }
-
     }
 
+    const filterLocation: locationsObj[] = locations;
 
-    const filterLocation : locationsObj[] = locations;
- 
     return (
         <div className="space-y-6"> 
             <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
@@ -168,12 +148,16 @@ export default function LocationList() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
-              
+            {loading && (  // Show the spinner if loading is true
+                <div className="flex justify-center items-center">
+                    <div className="spinner"></div>  {/* Replace with your spinner component */}
+                </div>
+            )}
 
-                {filterLocation.length > 0 ? ( filterLocation.map((location) => (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
+                {filterLocation.length > 0 ? ( 
+                    filterLocation.map((location) => (
                     <div key={location.id} className="rounded-2xl border border-gray-200 bg-white  dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
-                        {/* <a href={`/locations/${location.id}`}> */}
                         <div className="flex items-end justify-between mt-5">
                             <div>
                                 <h3>
@@ -186,28 +170,24 @@ export default function LocationList() {
                                         <a href={location.address} target="_blank"> Click to see the Address</a> 
                                     </span> 
                                 </p>
-                    
                                 <div className="flex gap-5">
-                                    <button  > 
-                                    <EyeIcon   onClick={() => viewLocation(location.id)} /> 
+                                    <button> 
+                                        <EyeIcon onClick={() => viewLocation(location.id)} /> 
                                     </button>
-                                    <button    onClick={() => getLocation(location.id)}  >
-                                    <PencilIcon />
+                                    <button onClick={() => getLocation(location.id)}>
+                                        <PencilIcon />
                                     </button> 
-                                    <button  > 
-                                    <TrashBinIcon /> 
+                                    <button> 
+                                        <TrashBinIcon /> 
                                     </button>
                                 </div> 
-    
                             </div> 
                         </div> 
                     </div>
                 ))
                 ) : (
-                    <h1>  No Location Found </h1>
+                    <h1>No Location Found</h1>
                 )}
- 
-            
             </div>
 
             <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
@@ -220,7 +200,6 @@ export default function LocationList() {
                      Manage your Location details 
                     </p>
                 </div>
- 
                 <form onSubmit={handleSave} className="flex flex-col">
                     { error !== '' && (
                         <p className="mt-2 text-sm text-error-500">{error}</p>
