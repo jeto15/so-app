@@ -53,7 +53,14 @@ export default function InventorylistPerLocaitons() {
   const [customerName, setCustomerName] = useState('');
  
   const [transactoinError, setTransactionError] = useState(String);
+ 
 
+  const [selectedAction, setSelectedAction] = useState('');
+
+  const handleActionChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedAction(event.target.value);
+  };
+ 
 
   useEffect(() => { 
     fetchProducts( '', parseInt(locId) ); 
@@ -113,20 +120,34 @@ export default function InventorylistPerLocaitons() {
   // };
   
 
-  const handleSelect = (item: ProductObj) => {
+  // const handleSelect = (item: ProductObj) => {
+ 
 
-    console.log('ProductObj',item);
-
-    const alreadySelected = selectedItems.find((i) => i.Id === item.Id);
-    if (!alreadySelected) {
-      setSelectedItems([...selectedItems, item]);
-    }
+  //   const alreadySelected = selectedItems.find((i) => i.Id === item.Id);
+  //   if (!alreadySelected) {
+  //     setSelectedItems([...selectedItems, item]);
+  //   }
+  
      
+  // };
+
+  const handleSelect = (product: ProductObj) => {
+    const isAlreadySelected = selectedItems.some(item => item.InventoryID === product.InventoryID);
+  
+    if (isAlreadySelected) {
+      // Deselect: remove from selectedItems
+      setSelectedItems(selectedItems.filter(item => item.InventoryID !== product.InventoryID));
+    } else {
+      // Select: add to selectedItems
+      setSelectedItems([...selectedItems, product]);
+    }
   };
   
   const handleRemove = (Id: string) => {
     setSelectedItems((prev) => prev.filter((item) => item.Id !== Id));
+ 
   };
+ 
 
  
   const handlSaveTransaction = async ( ) => { 
@@ -150,6 +171,7 @@ export default function InventorylistPerLocaitons() {
         }
 
         if( actiontype === 'Purchase' ){
+  
           supId = supplierId;
           descriptions =  'Purchasing Stockin Entry';
           apiRequstString = '/api/transaction/purchase';
@@ -247,40 +269,56 @@ export default function InventorylistPerLocaitons() {
         <div className="max-w-md">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
             Inventory Products 
-          </h3>
-          {/* <Button size="sm" variant="outline" onClick={handleVoiceSearch}>
-            🎤 Speak to Search
-          </Button> */}
+          </h3> 
         </div> 
         <div>
-                        
-            <button
-            onClick={openModalStockPurchase}
-            className="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition  px-4 py-3 text-sm bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 m-1"
-            > 
-              Purchase 
-            </button>
+          <select
+            onChange={handleActionChange}
+            className="border p-2 rounded"
+            value={selectedAction}
+          >
+            <option value="">Select Action</option>
+            <option value="purchase">Purchase</option>
+            <option value="sale">Sell</option>
+            <option value="stock_in">Stock In</option>
+            <option value="stock_out">Stock Out</option>
+          </select>
 
+          {selectedAction === 'purchase' && (
             <button
-            onClick={openModalStockSales}
-            className="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition  px-4 py-3 text-sm bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 m-1"
-            > 
-              Sale 
+              onClick={openModalStockPurchase}
+              className="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-4 py-3 text-sm bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 m-1"
+            >
+              Apply [{selectedItems.length}]
             </button>
+          )}
 
+          {selectedAction === 'sale' && (
             <button
-            onClick={openModalStockIn}
-            className="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition  px-4 py-3 text-sm bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300  m-1"
-            > 
-              Stock In 
+              onClick={openModalStockSales}
+              className="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-4 py-3 text-sm bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 m-1"
+            >
+              Apply  [{selectedItems.length}]
             </button>
+          )}
 
-            <button 
-            onClick={openModalStockOut}
-            className="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition  px-4 py-3 text-sm bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300  m-1"
-            > 
-              Stock Out 
+          {selectedAction === 'stock_in' && (
+            <button
+              onClick={openModalStockIn}
+              className="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-4 py-3 text-sm bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 m-1"
+            >
+              Apply  [{selectedItems.length}]
             </button>
+          )}
+
+          {selectedAction === 'stock_out' && (
+            <button
+              onClick={openModalStockOut}
+              className="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-4 py-3 text-sm bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 m-1"
+            >
+              Apply  [{selectedItems.length}]
+            </button>
+          )}
         </div>
       </div>
       <div className="overflow-x-auto">
@@ -372,15 +410,14 @@ export default function InventorylistPerLocaitons() {
                     </a> 
                     <button 
                       onClick={() => handleSelect(product)} 
-                      className="inline-flex items-center px-2.5 py-0.5 justify-center gap-1 rounded-full font-medium text-sm bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400"    >
-                        Select
+                      className={`inline-flex items-center px-2.5 py-0.5 justify-center gap-1 rounded-full font-medium text-sm ${
+                        selectedItems.some(item => item.InventoryID === product.InventoryID)
+                          ? 'bg-red-500 text-white' // Deselect style
+                          : 'bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400' // Select style
+                      }`}
+                    >
+                      {selectedItems.some(item => item.InventoryID === product.InventoryID) ? 'Deselect' : 'Select'}
                     </button>
-
-                    
- 
-                    {/* <button  onClick={() => removeProduct(product.Id)}  >
-                      <TrashBinIcon />
-                    </button> */}
                   </div>
  
                 </TableCell>
@@ -429,10 +466,10 @@ export default function InventorylistPerLocaitons() {
               <div className="mt-7">
                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                   <div className="col-span-2 lg:col-span-1">
-                    <Label>Supplier is?</Label> 
+                    <Label>Custmer Name?</Label> 
                     <Input 
                       type="text"  
-                      placeholder="Customer name"  
+                      placeholder="Enter Customer Name"  
                       className="form-control mb-3 "    
                       onChange={handleEnterCustomer} 
                       defaultValue={customerName}
