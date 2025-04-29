@@ -34,6 +34,9 @@ export default function ProductList(  ) {
   //const [searchVoice, setSearchVoice] = useState("");
   const [labelProdisCreate,setLabelProdisCreate]  = useState("");
   const [prodcountresult, setProdcountresult] = useState(0);
+  const [searchKey, SetSearchKey] = useState("");
+  const [searchKeyForDisplay, SetSearchKeyForDisplay] = useState("");
+ 
 
   const [newProduct, setNewProduct] = useState(
     { 
@@ -89,8 +92,10 @@ export default function ProductList(  ) {
       } else { 
         await axios.post('/api/products', newProduct); 
       }
+        
+      SetSearchKeyForDisplay(searchKey);
 
-      fetchProducts();
+      fetchProducts( searchKey );
       closeModal();
     } catch (error) {
       console.error('Error adding product:', error);
@@ -102,7 +107,7 @@ export default function ProductList(  ) {
       try { 
         console.log('viewMode', viewMode); 
         const response = await axios.get("/api/products",{ params: { searchKey , viewMode  }});
-        //console.log(response.data);
+       
         setProducts(response.data); 
 
         setProdcountresult( response.data.length  );
@@ -133,6 +138,7 @@ export default function ProductList(  ) {
   // };
 
   const handleSearchProduct = (keyword: React.ChangeEvent<HTMLInputElement>) => {  
+    SetSearchKey(keyword.target.value.toLowerCase()); 
     fetchProducts( keyword.target.value.toLowerCase() );
   } 
 
@@ -212,8 +218,9 @@ export default function ProductList(  ) {
         <div className="d-flex">
           <Input 
             type="text"  
-            placeholder="Search products..."  
-            className="form-control mb-3 "    
+            placeholder="Search products..."   
+            className="form-control mb-3 " 
+            defaultValue={searchKeyForDisplay}    
             onChange={handleSearchProduct} 
           />
        
