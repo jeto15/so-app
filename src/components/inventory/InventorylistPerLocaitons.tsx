@@ -238,12 +238,14 @@ export default function InventorylistPerLocaitons() {
     [productId]: saleprice,
     }));
   };
- 
+  
+  
  
   const openModalStockIn =() =>{
     setActionType("Stock In");
     setTransactionError('');
     setCustomerName('');
+    clearAllItemFields();
     openModal();
   }
 
@@ -251,6 +253,7 @@ export default function InventorylistPerLocaitons() {
     setActionType("Stock Out");
     setTransactionError('');
     setCustomerName('');
+    clearAllItemFields();
     openModal();
 
   }
@@ -259,11 +262,13 @@ export default function InventorylistPerLocaitons() {
     setActionType("Purchase");
     setTransactionError('');
     setCustomerName(''); 
+    clearAllItemFields();
     openModal();
   }
   const openModalStockSales =() =>{
     setActionType("Sale");
     setTransactionError('');
+    clearAllItemFields();
     openModal();
 
   }
@@ -278,7 +283,17 @@ export default function InventorylistPerLocaitons() {
     setStockInReason(value);
   };
 
+  const clearAllItemFields = () => {
+    const updatedItems = selectedItems.map(item => ({
+      ...item,
+      quantity: 0,
+      sale_price: 0,
+    })); 
+    setSelectedItems(updatedItems);
 
+    setQuantities([]);
+    setSale_price([]);
+  };
   
 
   const filteredProducts: ProductObj[] = products;
