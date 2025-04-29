@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
-import { DropdownItem } from "../ui/dropdown/DropdownItem";
+//import { DropdownItem } from "../ui/dropdown/DropdownItem"; 
   
 import { useEffect } from "react";
 
@@ -109,7 +109,7 @@ export default function UserDropdown() {
         </div>
 
         <ul className="flex flex-col gap-1 pt-4 pb-3 border-b border-gray-200 dark:border-gray-800">
-          <li>
+          {/* <li>
             <DropdownItem
               onItemClick={closeDropdown}
               tag="a"
@@ -133,8 +133,8 @@ export default function UserDropdown() {
               </svg>
               Edit profile
             </DropdownItem>
-          </li>
-          <li>
+          </li> */}
+          {/* <li>
             <DropdownItem
               onItemClick={closeDropdown}
               tag="a"
@@ -158,8 +158,8 @@ export default function UserDropdown() {
               </svg>
               Account settings
             </DropdownItem>
-          </li>
-          <li>
+          </li> */}
+          {/* <li>
             <DropdownItem
               onItemClick={closeDropdown}
               tag="a"
@@ -184,7 +184,7 @@ export default function UserDropdown() {
               Support
             </DropdownItem>
          
-          </li>
+          </li> */}
         </ul>
         <Link 
           href=''
