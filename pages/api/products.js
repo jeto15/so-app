@@ -86,18 +86,26 @@ const addProduct = async (req, res) => {
     const srp = parseFloat(srpPrice) || 0;
     const cpt = parseFloat(cptPrice) || 0;
     const wl = parseFloat(wlprice) || 0;
-
-
-    // if ( category == ""  ) {
-    //   return res.status(400).json({ message: "Missing fields" });
-    // }
-
-    // const category = productCategory?.trim() || "Uncategorized";
-
+ 
     const [result] = await pool.query(
       "INSERT INTO products (product_details, product_code, product_price, product_cpt_price, product_ws_price, product_category) VALUES (?, ?, ?, ?, ?, ?)", 
       [productName, productCode, srp, cpt, wl, category] // Ensure the order matches
     );
+
+    const productId = result.insertId;
+
+    // Get all location records
+    const [locations] = await pool.query("SELECT id FROM locations"); 
+
+    if (locations.length > 0) {
+      const inventoryValues = locations.map(loc => [productId, loc.id, 0]); // 0 as default quantity
+
+      // Bulk insert inventory records
+      await pool.query(
+        "INSERT INTO inventory (product_id, location_id, quantity) VALUES ?",
+        [inventoryValues]
+      );
+    }  
 
     return res.status(201).json({ 
       id: result.insertId, 
@@ -126,16 +134,7 @@ const updateProduct = async (req, res) => {
       cptPrice, 
       wlprice
     } = req.body;
-
-    console.log({
-      Id,
-      productName,
-      productCode,  
-      productCategory,  // Fixed typo
-      srpPrice,         // This should be the product_price
-      cptPrice, 
-      wlprice
-    });
+ 
 
     const category = productCategory?.trim() || "Uncategorized";
   

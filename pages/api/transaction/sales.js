@@ -31,6 +31,7 @@ const handlSale = async (req, res) => {
               location_id,
               productId,
               description,
+              sale_price,
               InventoryID,   
               customername
             } = sale;
@@ -66,8 +67,8 @@ const handlSale = async (req, res) => {
       
             // Insert the sale record into the Sales table
             await conn.execute(
-              `INSERT INTO sales (product_id, inventory_id, quantity, description, customer) VALUES (?, ?, ?, ?,?)` ,
-              [productId, InventoryID, quantity, description, customername]
+              `INSERT INTO sales (product_id, inventory_id, quantity, description, customer, sale_price) VALUES (?, ?, ?, ?,?,?)` ,
+              [productId, InventoryID, quantity, description, customername,sale_price]
             );
           } 
       

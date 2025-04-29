@@ -50,8 +50,10 @@ export default function InventorylistPerLocaitons() {
   const [supplierId, setSupplierId] = useState(String);
   //Stock in states
   const [quantities, setQuantities] = useState<Record<number, number>>({});
+  const [sale_price, setSale_price] = useState<Record<number, number>>({});
   const [customerName, setCustomerName] = useState('');
- 
+  const [stockInReason, setStockInReason] = useState('');
+
   const [transactoinError, setTransactionError] = useState(String);
  
 
@@ -156,11 +158,11 @@ export default function InventorylistPerLocaitons() {
         let supId = '';
         let apiRequstString = '';
         if( actiontype === 'Stock Out' ){
-          descriptions =  'Manual Stockout Entry';
+          descriptions =  stockInReason+' '+'Manual Stockout Entry';
           apiRequstString = '/api/transaction/sales';
         }
         if( actiontype === 'Stock In' ){
-          descriptions =  'Manual Stockin Entry';
+          descriptions =  stockInReason+' '+'Manual Stockin Entry';
           apiRequstString = '/api/transaction/purchase';
         }
         
@@ -188,6 +190,7 @@ export default function InventorylistPerLocaitons() {
             productId: product.Id,  
             customername: customerName, 
             quantity: quantities[parseInt(product.Id)] || 0,
+            sale_price: sale_price[parseInt(product.Id)] || 0,
           }
         )).filter((item) => item.quantity > 0); 
 
@@ -200,6 +203,8 @@ export default function InventorylistPerLocaitons() {
         fetchProducts( '', parseInt(locId) );  
 
         setActionType('');
+
+        setStockInReason(''); 
 
         closeModal(); 
         setTransactionError(''); 
@@ -224,6 +229,13 @@ export default function InventorylistPerLocaitons() {
     setQuantities((prev) => ({
     ...prev,
     [productId]: qty,
+    }));
+  };
+
+  const handleSalePriceChange = (productId: number, saleprice: number): void => {
+    setSale_price((prev) => ({
+    ...prev,
+    [productId]: saleprice,
     }));
   };
  
@@ -257,10 +269,17 @@ export default function InventorylistPerLocaitons() {
   }
 
   const handleEnterCustomer = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    console.log('Typed value:', value); // ✅ you get the value here
+    const value = e.target.value; 
     setCustomerName(value);
   };
+
+  const handleEnterStockInReason = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value; 
+    setStockInReason(value);
+  };
+
+
+  
 
   const filteredProducts: ProductObj[] = products;
   return (
@@ -287,7 +306,7 @@ export default function InventorylistPerLocaitons() {
           {selectedAction === 'purchase' && (
             <button
               onClick={openModalStockPurchase}
-              className="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-4 py-3 text-sm bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 m-1"
+              className="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-2  py-1 text-sm bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 m-1"
             >
               Apply [{selectedItems.length}]
             </button>
@@ -296,7 +315,7 @@ export default function InventorylistPerLocaitons() {
           {selectedAction === 'sale' && (
             <button
               onClick={openModalStockSales}
-              className="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-4 py-3 text-sm bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 m-1"
+              className="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-2  py-1 text-sm bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 m-1"
             >
               Apply  [{selectedItems.length}]
             </button>
@@ -305,7 +324,7 @@ export default function InventorylistPerLocaitons() {
           {selectedAction === 'stock_in' && (
             <button
               onClick={openModalStockIn}
-              className="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-4 py-3 text-sm bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 m-1"
+              className="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-2  py-1 text-sm bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 m-1"
             >
               Apply  [{selectedItems.length}]
             </button>
@@ -314,7 +333,7 @@ export default function InventorylistPerLocaitons() {
           {selectedAction === 'stock_out' && (
             <button
               onClick={openModalStockOut}
-              className="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-4 py-3 text-sm bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 m-1"
+              className="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-2  py-1 text-sm bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 m-1"
             >
               Apply  [{selectedItems.length}]
             </button>
@@ -380,29 +399,29 @@ export default function InventorylistPerLocaitons() {
               filteredProducts.map((product) => (
 
                 <TableRow key={product.InventoryID} className="">
-                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400"> 
+                <TableCell className="py-1 text-gray-500 text-theme-sm dark:text-gray-400"> 
                   <span className="text-gray-500 text-theme-xs dark:text-gray-400">
                         {product.product_category}
                     </span>
                 </TableCell>
-                <TableCell className="py-3">
+                <TableCell className="py-1">
                   <div className="flex items-center gap-3"> 
                       <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
                         {product.product_code}
                       </p>  
                   </div>
                 </TableCell>
-                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400"> 
+                <TableCell className="py-1 text-gray-500 text-theme-sm dark:text-gray-400"> 
                     <span className="text-gray-500 text-theme-xs dark:text-gray-400">
                         {product.product_details}
                     </span>
                 </TableCell>
-                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400"> 
+                <TableCell className="py-1 text-gray-500 text-theme-sm dark:text-gray-400"> 
                   <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
                     {product.quantity} 
                   </p>
                 </TableCell>  
-                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400"> 
+                <TableCell className="py-1 text-gray-500 text-theme-sm dark:text-gray-400"> 
 
                   <div className="flex gap-5">
                   <a href={`/products/product-record?id=${product.Id}`} target="_blank">
@@ -478,6 +497,27 @@ export default function InventorylistPerLocaitons() {
                 </div>
               </div>
             )}
+
+            {(actiontype === 'Stock In' ||  actiontype === 'Stock Out') &&  (
+              <div className="mt-7">
+                <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
+                  <div className="col-span-2 lg:col-span-1">
+                    <Label>Descriptions</Label> 
+                    <Input 
+                      type="text"  
+                      placeholder="Example: Note, Reason or Label"  
+                      className="form-control mb-3 "    
+                      onChange={handleEnterStockInReason} 
+                      defaultValue={stockInReason}
+                    />
+                  </div>
+                </div>
+              </div> 
+            )} 
+
+            
+    
+            
             </div> 
           </div>
           <div  className="flex flex-col">   
@@ -497,13 +537,29 @@ export default function InventorylistPerLocaitons() {
                             </TableCell> 
                             <TableCell className="py-1 text-gray-500 text-theme-sm dark:text-gray-400"> 
                                 <span className="text-gray-500 text-theme-xs dark:text-gray-400">
-                                  [{product.product_code}] {product.product_details}   
+                                  [{product.product_code}] {product.product_details}| SRP:{product.product_price}
                                 </span>
                             </TableCell>
+
+                            {(actiontype === 'Sale' ||  actiontype === 'Purchase') &&  (
+
+                            <TableCell className="py-1 text-gray-500 text-theme-sm dark:text-gray-400"> 
+                                <input
+                                    type="number" 
+                                    placeholder="Enter Price:0.00"
+                                    className="border px-2 py-1 w-40"  
+                                    value={sale_price[parseInt(product.Id)] || ''}
+                                    onChange={(e) => handleSalePriceChange(  parseInt(product.Id) , parseInt(e.target.value || '0', 10))}
+                                />
+                            </TableCell>  
+
+                            )} 
+                              
                             <TableCell className="py-1 text-gray-500 text-theme-sm dark:text-gray-400"> 
                                 <input
                                     type="number"
                                     min={0}
+                                    placeholder="QTY"
                                     className="border px-2 py-1 w-20"  
                                     value={quantities[parseInt(product.Id)] || ''}
                                     onChange={(e) => handleQtyChange(  parseInt(product.Id) , parseInt(e.target.value || '0', 10))}

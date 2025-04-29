@@ -29,8 +29,9 @@ const handlPurchase = async (req, res) => {
               quantity,
               location_id,
               productId,
-              description,
-              supplierId,          // Optional, can be used for notes or logging
+              description, 
+              supplierId,          // Optional, can be used for notes or logging4
+              sale_price,
               InventoryID
             } = purchase;
       
@@ -63,10 +64,23 @@ const handlPurchase = async (req, res) => {
             }
       
             // Insert the purchase record into the Purchase table
-            await conn.execute(
-              `INSERT INTO purchases (product_id, inventory_id, quantity, description, supplier_id) VALUES (?, ?, ?, ?, ?)` ,
-              [productId, InventoryID, quantity, description, supplierId]
-            ); 
+         
+            if( !supplierId ) {
+              console.log('Is Stockin '); 
+              await conn.execute(
+                `INSERT INTO purchases (product_id, inventory_id, quantity, description) VALUES (?, ?, ?, ?)` ,
+                [productId, InventoryID, quantity, description]
+              ); 
+            } else {
+              
+              console.log('Sell '); 
+              await conn.execute(
+                `INSERT INTO purchases (product_id, inventory_id, quantity, description, supplier_id,unit_cost) VALUES (?, ?, ?, ?, ?, ?)` ,
+                [productId, InventoryID, quantity, description, supplierId, sale_price]
+              ); 
+            }
+              
+        
           } 
 
 
