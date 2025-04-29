@@ -16,7 +16,8 @@ type SaleRecord = {
   description: string;
   customer:string;
   quantity: number;
-  sale_date: string;
+  sale_date: string; 
+  sale_price: number;
 };
 
 type SaleTableProps = {
@@ -34,16 +35,19 @@ const Sale_Table: React.FC<SaleTableProps> = ({ records }) => {
         <Table className="min-w-full text-sm text-gray-700 dark:text-gray-300">
           <TableHeader className="bg-gray-100 dark:bg-gray-800">
             <TableRow>
-              <TableCell isHeader className="py-3 px-4 text-left font-semibold text-gray-600 dark:text-gray-300">
+              <TableCell isHeader className="py-1 px-2 text-left font-semibold text-gray-600 dark:text-gray-300 text-sm">
                 Created Date
               </TableCell>
-              <TableCell isHeader className="py-3 px-4 text-left font-semibold text-gray-600 dark:text-gray-300">
+              <TableCell isHeader className="py-1 px-2 text-left font-semibold text-gray-600 dark:text-gray-300 text-sm">
                 Description
               </TableCell>
-              <TableCell isHeader className="py-3 px-4 text-left font-semibold text-gray-600 dark:text-gray-300">
+              <TableCell isHeader className="py-1 px-2 text-left font-semibold text-gray-600 dark:text-gray-300 text-sm">
                 Customer
               </TableCell>
-              <TableCell isHeader className="py-3 px-4 text-left font-semibold text-gray-600 dark:text-gray-300">
+              <TableCell isHeader className="py-1 px-2 text-left font-semibold text-gray-600 dark:text-gray-300 text-sm">
+                Selling Price
+              </TableCell>
+              <TableCell isHeader className="py-1 px-2 text-left font-semibold text-gray-600 dark:text-gray-300 text-sm">
                 Quantity
               </TableCell>
             </TableRow>
@@ -52,16 +56,27 @@ const Sale_Table: React.FC<SaleTableProps> = ({ records }) => {
           <TableBody className="divide-y divide-gray-200 dark:divide-gray-700">
             {records.map((record) => (
               <TableRow key={record.saleId} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                <TableCell className="py-3 px-4">
-                  {record.sale_date}
+                <TableCell className="py-1 px-2 text-sm">
+                {new Intl.DateTimeFormat('en-PH', {
+                    timeZone: 'Asia/Manila',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true,
+                  }).format(new Date(record.sale_date))} 
                 </TableCell>
-                <TableCell className="py-3 px-4">
+                <TableCell className="py-1 px-2 text-sm">
                   {record.description} (Qty Out: {record.quantity})
                 </TableCell>
-                <TableCell className="py-3 px-4">
+                <TableCell className="py-1 px-2 text-sm">
                   {record.customer}   
                 </TableCell>
-                <TableCell className="py-3 px-4">
+                <TableCell className="py-1 px-2 text-sm">
+                  {record.sale_price}
+                </TableCell> 
+                <TableCell className="py-1 px-2 text-sm">
                   {record.quantity}
                 </TableCell>
               </TableRow>

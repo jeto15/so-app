@@ -49,6 +49,7 @@ type SaleRecord = {
   customer: string; 
   quantity: number; 
   sale_date: string; 
+  sale_price: number;
 };
 
  
@@ -82,7 +83,7 @@ const LocationTransaction: React.FC<LocationTransaction> = ({ recordId ,  produc
       const response = await axios.get("/api/transaction/get/saleperprod", {
         params: { recordId, productId },
       });
-       
+      console.log('response.data',response.data);
       setSaleList(response.data);
     } catch (error) {
       console.error("Failed to fetch purchase record:", error);
@@ -143,8 +144,7 @@ const LocationTransaction: React.FC<LocationTransaction> = ({ recordId ,  produc
   
   return (
     <>  
-    <div>
-
+    <div> 
       <div className="flex flex-col md:flex-row gap-4 p-6 bg-gray-100 ">
         {/* Left: Location Details */}
         <div className="md:w-1/2 bg-white shadow-lg rounded-2xl p-6 space-y-4">
@@ -156,14 +156,38 @@ const LocationTransaction: React.FC<LocationTransaction> = ({ recordId ,  produc
                   <EyeIcon   onClick={() => viewLocation(record.id)} /> 
             </button> 
           </div>
+  
+        </div>
 
+        {/* Right: Quantity Card */}
+        <div className="md:w-1/2  items-center  p-6 space-y-4">
+          <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-sm text-center border-l-4 border-blue-500">
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">🛒 Quantity Available</h3>
+              <div className="text-4xl font-bold text-blue-600 mb-1">{reaminaingQty} Units</div> 
+          </div>
+    
+        </div> 
+        {/* <div className="md:w-1/2 flex items-center justify-center">
+         
+        </div> */}
+      </div>
+  
+
+      <div className="flex flex-col md:flex-row gap-4 p-6 pt-1 bg-gray-100 ">
+        {/* Left: Location Details */}
+        <div className="md:w-1/2 bg-white shadow-lg rounded-2xl p-6 space-y-4"> 
           <div className='mt-[5%]' >
                 {/* Left Column Table */}
                 <div className="overflow-auto">
                   <Purchase_Table records={fetchPurchaseRecords} />
                 </div>
         
-            </div>
+            </div> 
+        </div>
+
+        {/* Right: Quantity Card */}
+        <div className="md:w-1/2 bg-white shadow-lg rounded-2xl p-6 space-y-4"> 
+ 
         
             <div className='mt-[5%]'>
                 {/* Left Column Table */}
@@ -173,14 +197,10 @@ const LocationTransaction: React.FC<LocationTransaction> = ({ recordId ,  produc
         
             </div>
         </div>
-
-        {/* Right: Quantity Card */}
-        <div className="md:w-1/2 flex items-center justify-center">
-          <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-sm text-center border-l-4 border-blue-500">
-            <h3 className="text-lg font-semibold text-gray-700 mb-2">🛒 Quantity Available</h3>
-            <div className="text-4xl font-bold text-blue-600 mb-1">{reaminaingQty} Units</div> 
-          </div>
-        </div>
+        
+        {/* <div className="md:w-1/2 flex items-center justify-center">
+         
+        </div> */}
       </div>
   
     </div>

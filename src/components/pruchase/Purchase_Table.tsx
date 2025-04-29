@@ -37,16 +37,20 @@ const Purchase_Table: React.FC<PurchaseTableProps> = ({ records }) => {
         <Table className="min-w-full text-sm text-gray-700 dark:text-gray-300">
           <TableHeader className="bg-gray-100 dark:bg-gray-800">
             <TableRow>
-              <TableCell isHeader className="py-3 px-4 text-left font-semibold text-gray-600 dark:text-gray-300">
+              <TableCell isHeader className="py-1 px-2 text-left  font-semibold text-gray-600 dark:text-gray-300 text-sm">
                 Created Date
               </TableCell>
-              <TableCell isHeader className="py-3 px-4 text-left font-semibold text-gray-600 dark:text-gray-300">
+              <TableCell isHeader className="py-1 px-2 text-left font-semibold text-gray-600 dark:text-gray-300 text-sm">
                 Description
               </TableCell>
-              <TableCell isHeader className="py-3 px-4 text-left font-semibold text-gray-600 dark:text-gray-300">
+              <TableCell isHeader className="py-1 px-2 text-left font-semibold text-gray-600 dark:text-gray-300 text-sm">
                 Supplier
               </TableCell>
-              <TableCell isHeader className="py-3 px-4 text-left font-semibold text-gray-600 dark:text-gray-300">
+              <TableCell isHeader className="py-1 px-2 text-left font-semibold text-gray-600 dark:text-gray-300 text-sm">
+                Unit Cost
+              </TableCell>
+              
+              <TableCell isHeader className="py-1 px-2 text-left font-semibold text-gray-600 dark:text-gray-300 text-sm">
                 Quantity
               </TableCell>
             </TableRow>
@@ -58,12 +62,23 @@ const Purchase_Table: React.FC<PurchaseTableProps> = ({ records }) => {
                 key={record.purchaseId}
                 className="hover:bg-gray-50 dark:hover:bg-gray-700"
               >
-                <TableCell className="py-3 px-4">{record.purchase_date}</TableCell>
-                <TableCell className="py-3 px-4">
+                <TableCell className="py-1 px-2 text-sm ">
+
+                  {new Intl.DateTimeFormat('en-PH', {
+                    timeZone: 'Asia/Manila',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true,
+                  }).format(new Date(record.purchase_date))}  </TableCell>
+                <TableCell className="py-1 px-2 text-sm">
                   {record.description} (Qty Entered: {record.quantity})
                 </TableCell>
-                <TableCell className="py-3 px-4">{record.supplierName}</TableCell>
-                <TableCell className="py-3 px-4">{record.quantity}</TableCell>
+                <TableCell className="py-1 px-2 text-sm">{record.supplierName}</TableCell>
+                <TableCell className="py-1 px-2 text-sm">{record.unit_cost}</TableCell>
+                <TableCell className="py-1 px-2 text-sm">{record.quantity}</TableCell>
               </TableRow>
             ))}
           </TableBody>
