@@ -168,14 +168,14 @@ export default function InventorylistPerLocaitons() {
         
         
         if( actiontype === 'Sale' ){ 
-          descriptions =  'Selling Stockin Entry';
+          descriptions =  stockInReason+' '+'Selling Stockin Entry';
           apiRequstString = '/api/transaction/sales';
         }
 
         if( actiontype === 'Purchase' ){
   
           supId = supplierId;
-          descriptions =  'Purchasing Stockin Entry';
+          descriptions =  stockInReason+' '+'Purchasing Stockin Entry';
           apiRequstString = '/api/transaction/purchase';
         }
 
@@ -196,6 +196,8 @@ export default function InventorylistPerLocaitons() {
 
         if( apiRequstString != '' ){
           await axios.post(apiRequstString, selectedList);   
+
+          alert('Tansaction '+actiontype+' Complete!');
         }
     
         setSelectedItems([]);
@@ -512,8 +514,8 @@ export default function InventorylistPerLocaitons() {
                 </div>
               </div>
             )}
-
-            {(actiontype === 'Stock In' ||  actiontype === 'Stock Out') &&  (
+{/* 
+            {(actiontype === 'Stock In' ||  actiontype === 'Stock Out') &&  ( */}
               <div className="mt-7">
                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                   <div className="col-span-2 lg:col-span-1">
@@ -528,7 +530,7 @@ export default function InventorylistPerLocaitons() {
                   </div>
                 </div>
               </div> 
-            )} 
+            {/* )}  */}
 
             
     
