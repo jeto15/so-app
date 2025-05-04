@@ -8,6 +8,8 @@ import {
   ChevronDownIcon, 
   HorizontaLDots, 
   TableIcon, 
+  CalenderIcon,
+  BoxIcon
 } from "../icons/index"; 
 
 type NavItem = {
@@ -24,12 +26,17 @@ const navItems: NavItem[] = [
   //   subItems: [{ name: "Ecommerce", path: "/", pro: false }],
   // },
   {
+    icon: <CalenderIcon />,
+    name: "Activities",
+    path: "/",
+  },
+  {
     icon: <TableIcon />,
     name: "Products",
     path: "/products",
   },
   {
-    icon: <TableIcon />,
+    icon: <BoxIcon />,
     name: "Locations",
     path: "/locations",
   },
