@@ -472,17 +472,18 @@ export default function InventorylistPerLocaitons() {
         </Table>
       </div>
       <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[1000px] m-4">
-        <div className="no-scrollbar relative w-full max-w-[1000px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
-            
-          <div className="px-2 pr-14">
-            <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
-              {actiontype}
-            </h4> 
-            {transactoinError && <div className="text-red-500 mt-2">{transactoinError}</div>} 
-          </div> 
-          <div className="flex flex-col">
-            <div className="custom-scrollbar px-1 pb-3">
-      
+      <div className="no-scrollbar relative w-full max-w-[1000px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
+        
+        <div className="px-2 pr-14">
+          <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
+            {actiontype}
+          </h4>
+          {transactoinError && <div className="text-red-500 mt-2">{transactoinError}</div>}
+        </div>
+
+        <div className="flex flex-col">
+          <div className="custom-scrollbar px-1 pb-3">
+
             {actiontype === 'Purchase' && (
               <div className="mt-7">
                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
@@ -498,130 +499,128 @@ export default function InventorylistPerLocaitons() {
               </div>
             )}
 
-          {actiontype === 'Sale' && (
+            {actiontype === 'Sale' && (
               <div className="mt-7">
                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                   <div className="col-span-2 lg:col-span-1">
-                    <Label>Custmer Name?</Label> 
-                    <Input 
-                      type="text"  
-                      placeholder="Enter Customer Name"  
-                      className="form-control mb-3 "    
-                      onChange={handleEnterCustomer} 
+                    <Label>Customer Name?</Label>
+                    <Input
+                      type="text"
+                      placeholder="Enter Customer Name"
+                      className="form-control mb-3"
+                      onChange={handleEnterCustomer}
                       defaultValue={customerName}
                     />
                   </div>
                 </div>
               </div>
             )}
-{/* 
-            {(actiontype === 'Stock In' ||  actiontype === 'Stock Out') &&  ( */}
-              <div className="mt-7">
-                <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                  <div className="col-span-2 lg:col-span-1">
-                    <Label>Descriptions</Label> 
-                    <Input 
-                      type="text"  
-                      placeholder="Example: Note, Reason or Label"  
-                      className="form-control mb-3 "    
-                      onChange={handleEnterStockInReason} 
-                      defaultValue={stockInReason}
-                    />
-                  </div>
+
+            <div className="mt-7">
+              <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
+                <div className="col-span-2 lg:col-span-1">
+                  <Label>Descriptions</Label>
+                  <Input
+                    type="text"
+                    placeholder="Example: Note, Reason or Label"
+                    className="form-control mb-3"
+                    onChange={handleEnterStockInReason}
+                    defaultValue={stockInReason}
+                  />
                 </div>
-              </div> 
-            {/* )}  */}
-
-            
-    
-            
-            </div> 
-          </div>
-          <div  className="flex flex-col">   
-            <div className="w-full overflow-x-auto">
-                <Table className="min-w-[1000px] table-auto">
-                  {/* Table Header */} 
-                      {/* Table Body */} 
-                    <TableBody className="divide-y divide-gray-100 dark:divide-gray-800"> 
-                        {selectedItems.length > 0 ? (
-                            selectedItems.map((product) => (
-
-                            <TableRow key={product.Id} className="">
-                            <TableCell className="py-1 text-gray-500 text-theme-sm dark:text-gray-400"> 
-                            <span className="text-gray-500 text-theme-xs dark:text-gray-400">
-                                {product.product_category}
-                            </span>
-                            </TableCell> 
-                            <TableCell className="py-1 text-gray-500 text-theme-sm dark:text-gray-400"> 
-                                <span className="text-gray-500 text-theme-xs dark:text-gray-400">
-                                  [{product.product_code}] {product.product_details}| SRP:{product.product_price}
-                                </span>
-                            </TableCell>
-
-                            {(actiontype === 'Sale' ||  actiontype === 'Purchase') &&  (
-
-                            <TableCell className="py-1 text-gray-500 text-theme-sm dark:text-gray-400"> 
-                                <input
-                                    type="number" 
-                                    placeholder="Enter Price:0.00"
-                                    className="border px-2 py-1 w-40"  
-                                    value={sale_price[parseInt(product.Id)] || ''}
-                                    onChange={(e) => handleSalePriceChange(  parseInt(product.Id) , parseInt(e.target.value || '0', 10))}
-                                />
-                            </TableCell>  
-
-                            )} 
-                              
-                            <TableCell className="py-1 text-gray-500 text-theme-sm dark:text-gray-400"> 
-                                <input
-                                    type="number"
-                                    min={0}
-                                    placeholder="QTY"
-                                    className="border px-2 py-1 w-20"  
-                                    value={quantities[parseInt(product.Id)] || ''}
-                                    onChange={(e) => handleQtyChange(  parseInt(product.Id) , parseInt(e.target.value || '0', 10))}
-                                />
-                            </TableCell>  
-                            
-                            <TableCell className="py-1 text-gray-500 text-theme-sm dark:text-gray-400"> 
-
-                            <div className="flex gap-5">
-                              <button 
-                                onClick={() => handleRemove(product.Id)}
-                                className="inline-flex items-center px-2.5 py-0.5 justify-center gap-1 rounded-full font-medium text-sm bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400"    >
-                                  Remove
-                              </button> 
-                            </div>
-                            </TableCell>
-                        </TableRow>
-
-                        ))
-                        ) : (
-                        <tr>
-                            <td colSpan={4} className="text-center">
-                            No products found
-                            </td>
-                        </tr>
-                        )}
-
-                    </TableBody>
-                </Table>
-            </div>  
-            {selectedItems.length > 0 && (
-              <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
-                <Button size="sm" variant="outline" onClick={closeModal}>
-                  Close
-                </Button>
-                <Button size="sm" onClick={handlSaveTransaction} >
-                  Save Changes
-                </Button>
               </div>
-            )}
+            </div>
 
           </div>
         </div>
-      </Modal>
- 
+
+        {/* Table Section */}
+        <div className="flex flex-col">
+          <div className="w-full overflow-auto max-w-full max-h-[50vh] sm:max-h-[60vh] lg:max-h-[70vh]">
+            <div className="min-w-[600px] lg:min-w-full">
+              <Table className="table-auto w-full border-collapse">
+                <thead className="bg-gray-100 dark:bg-gray-800 sticky top-0 z-10">
+                  <tr>
+                    <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Category</th>
+                    <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Product</th>
+                    {(actiontype === 'Sale' || actiontype === 'Purchase') && (
+                      <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Price</th>
+                    )}
+                    <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Qty</th>
+                    <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Actions</th>
+                  </tr>
+                </thead>
+                <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {selectedItems.length > 0 ? (
+                    selectedItems.map((product) => (
+                      <TableRow key={product.Id} className="text-sm">
+                        <TableCell className="py-1 px-2 text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                          {product.product_category}
+                        </TableCell>
+                        <TableCell className="py-1 px-2 text-gray-500 dark:text-gray-400">
+                          [{product.product_code}] {product.product_details} | SRP: {product.product_price}
+                        </TableCell>
+                        {(actiontype === 'Sale' || actiontype === 'Purchase') && (
+                          <TableCell className="py-1 px-2 text-gray-500 dark:text-gray-400">
+                            <input
+                              type="number"
+                              placeholder="Enter Price: 0.00"
+                              className="border px-2 py-1 w-full max-w-[120px] rounded text-sm"
+                              value={sale_price[parseInt(product.Id)] || ''}
+                              onChange={(e) =>
+                                handleSalePriceChange(parseInt(product.Id), parseInt(e.target.value || '0', 10))
+                              }
+                            />
+                          </TableCell>
+                        )}
+                        <TableCell className="py-1 px-2 text-gray-500 dark:text-gray-400">
+                          <input
+                            type="number"
+                            min={0}
+                            placeholder="QTY"
+                            className="border px-2 py-1 w-full max-w-[80px] rounded text-sm"
+                            value={quantities[parseInt(product.Id)] || ''}
+                            onChange={(e) =>
+                              handleQtyChange(parseInt(product.Id), parseInt(e.target.value || '0', 10))
+                            }
+                          />
+                        </TableCell>
+                        <TableCell className="py-1 px-2 text-gray-500 dark:text-gray-400">
+                          <button
+                            onClick={() => handleRemove(product.Id)}
+                            className="inline-flex items-center px-2 py-1 rounded bg-red-100 text-red-600 text-xs font-medium hover:bg-red-200"
+                          >
+                            Remove
+                          </button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={5} className="text-center py-4 text-sm text-gray-500">
+                        No products found
+                      </td>
+                    </tr>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+
+          {selectedItems.length > 0 && (
+            <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
+              <Button size="sm" variant="outline" onClick={closeModal}>
+                Add More
+              </Button>
+              <Button size="sm" onClick={handlSaveTransaction}>
+                [ {actiontype} ]Save Changes 
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+    </Modal>
+
     </div>
     
   );

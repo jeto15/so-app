@@ -18,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
         const [rows] = await db.query<RowDataPacket[]>("SELECT * FROM users WHERE username = ?", [username]);
 
-        console.log('rows', rows);
+      //  console.log('rows', rows);
         if (rows.length === 0) return res.status(401).json({ message: "Invalid credentials" });
 
         const user = rows[0] as User; // Cast rows[0] to User
@@ -27,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           return res.status(401).json({ error: "Invalid username or password" });
         }   
 
-        console.log('jwt here',{ id: user.id, role: user.role });
+//        console.log('jwt here',{ id: user.id, role: user.role });
 
         const token = jwt.sign({ id: user.id, name:user.username, role: user.role }, process.env.JWT_SECRET!, { expiresIn: "1h" });
 
