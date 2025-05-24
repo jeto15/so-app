@@ -41,7 +41,7 @@ const getProducts = async (req, res) => {
             INNER JOIN stvno.products 
             ON (inventory.product_id = products.Id)
         WHERE inventory.location_id = ?
-         ORDER BY product_category ASC limit 100;`,
+         ORDER BY inventory.last_updated DESC limit 100;`,
             [locId] 
       );
     } else {
@@ -72,7 +72,7 @@ const getProducts = async (req, res) => {
               OR LOWER(products.product_code) LIKE ? 
               OR LOWER(products.product_category) LIKE ?
              )
-            ORDER BY product_category ASC;
+           ORDER BY inventory.last_updated DESC limit 100;
             ` ,
         [locId,search, search, search]
       );
