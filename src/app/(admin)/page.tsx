@@ -58,6 +58,8 @@ export default function Ecommerce() {
   const [purchaseTransactionsTransform, setPurchaseTransactionsTransform] = useState<Transaction[]>([]);
   const [salesTransactionsTransform, setSalesTransactionsTransform] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showSales, setShowSales] = useState(true);
+  const [showPurchases, setShowPurchases] = useState(true);
 
   // const topSellingProducts = [
   //   { name: 'Product A', sales: 1200 },
@@ -138,17 +140,41 @@ export default function Ecommerce() {
           </button>
 
             
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Sales Accordion */}
+      <div className="border rounded shadow">
+        <button
+          onClick={() => setShowSales(!showSales)}
+          className="w-full text-left px-4 py-2 bg-blue-100 hover:bg-blue-200 font-medium text-sm"
+        >
+          {showSales ? '▼' : '▶'} Sale & Stock-out Transactions
+        </button>
+        {showSales && (
+          <div className="p-4">
             <TransactionColumn
-            title="Sale & Stock-out Transactions"
-            transactions={salesTransactionsTransform}
+              title=""
+              transactions={salesTransactionsTransform}
             />
-            <TransactionColumn
-            title="Purchase & Stock-in Transactions"
-            transactions={purchaseTransactionsTransform}
-            />
-
           </div>
+        )}
+      </div>
+
+      {/* Purchase Accordion */}
+      <div className="border rounded shadow">
+        <button
+          onClick={() => setShowPurchases(!showPurchases)}
+          className="w-full text-left px-4 py-2 bg-green-100 hover:bg-green-200 font-medium text-sm"
+        >
+          {showPurchases ? '▼' : '▶'} Purchase & Stock-in Transactions
+        </button>
+        {showPurchases && (
+          <div className="p-4">
+            <TransactionColumn
+              title=""
+              transactions={purchaseTransactionsTransform}
+            />
+          </div>
+        )}
+      </div>
         </div>
       </div>
     </div>

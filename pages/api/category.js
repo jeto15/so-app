@@ -31,9 +31,12 @@ const getCategory = async (req, res) => {
         `, 
         [search]
       );
-  
-      const categories = rows.map((row) => row.category);
- 
+      
+      
+      const categories = rows.length > 0 
+      ? rows.map((row) => row.category) 
+      : [keyword]; // use `keyword` directly here
+      
       return res.status(200).json(categories);
     } catch (error) {
       console.error('Category fetch error:', error);

@@ -16,28 +16,28 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   onToChange,
 }) => {
   return (
-    <div className="flex gap-4 items-center">
-      <div>
-        <label className="block text-sm font-medium">From</label>
+    <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+      <div className="w-full md:w-auto">
+        <label className="block text-sm font-medium mb-1">From</label>
         <DatePicker
           selected={fromDate}
           onChange={onFromChange}
           selectsStart
           startDate={fromDate}
           endDate={toDate}
-          className="border px-3 py-1 rounded"
+          className="w-full border px-3 py-1 rounded"
           placeholderText="Start date"
         />
       </div>
-      <div>
-        <label className="block text-sm font-medium">To</label>
+      <div className="w-full md:w-auto">
+        <label className="block text-sm font-medium mb-1">To</label>
         <DatePicker
           selected={toDate}
           onChange={onToChange}
           selectsEnd
           startDate={fromDate}
           endDate={toDate}
-          className="border px-3 py-1 rounded"
+          className="w-full border px-3 py-1 rounded"
           placeholderText="End date"
         />
       </div>

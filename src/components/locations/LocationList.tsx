@@ -138,57 +138,80 @@ export default function LocationList() {
         <div className="space-y-6"> 
             <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
                 <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="max-w-md"> 
-                </div>
-                <div className="flex items-center gap-3">
-                    <button onClick={openFormModal}   className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
-                    Add New Location
-                    </button>
-                </div>
-                </div>
-            </div>
-
-            {loading && (  // Show the spinner if loading is true
-                <div className="flex justify-center items-center">
-                    <div className="spinner"></div>  {/* Replace with your spinner component */}
-                </div>
-            )}
-
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
-                {filterLocation.length > 0 ? ( 
-                    filterLocation.map((location) => (
-                    <div key={location.id} className="rounded-2xl border border-gray-200 bg-white  dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
-                        <div className="flex items-end justify-between mt-5">
-                            <div>
-                                <h3>
-                                    <span className="text-sm text-gray-500 dark:text-gray-400"> 
-                                        {location.name}
-                                    </span> 
-                                </h3>
-                                <p>
-                                    <span className="text-sm text-gray-500 dark:text-gray-400"> 
-                                        <a href={location.address} target="_blank"> Click to see the Address</a> 
-                                    </span> 
-                                </p>
-                                <div className="flex gap-5">
-                                    <button> 
-                                        <EyeIcon onClick={() => viewLocation(location.id)} /> 
-                                    </button>
-                                    <button onClick={() => getLocation(location.id)}>
-                                        <PencilIcon />
-                                    </button> 
-                                    <button> 
-                                        <TrashBinIcon /> 
-                                    </button>
-                                </div> 
-                            </div> 
-                        </div> 
+                    <div className="max-w-md"> 
                     </div>
-                ))
-                ) : (
-                    <h1>No Location Found</h1>
-                )}
+                    <div className="flex items-center gap-3">
+                        <button onClick={openFormModal}   className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
+                        Add New Location
+                        </button>
+                    </div>
+            
+                </div>
+                {loading && (  // Show the spinner if loading is true
+                        <div className="flex justify-center items-center">
+                            <div className="spinner"></div>  {/* Replace with your spinner component */}
+                        </div>
+                    )}
+
+                    <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800">
+                    {filterLocation.length > 0 ? (
+                        <table className="min-w-full divide-y divide-gray-200 text-sm text-left">
+                        <thead className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+                            <tr>
+                            <th className="px-4 py-2">Location Name</th>
+                            <th className="px-4 py-2">Address</th>
+                            <th className="px-4 py-2 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                            {filterLocation.map((location) => (
+                            <tr key={location.id}>
+                                <td className="px-4 py-2">{location.name}</td>
+                                <td className="px-4 py-2">
+                                <a
+                                    href={location.address}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:underline"
+                                >
+                                    Click to see the Address
+                                </a>
+                                </td>
+                                <td className="px-4 py-2 text-center">
+                                <div className="inline-flex gap-2">
+                                    <button
+                                    type="button"
+                                    onClick={() => viewLocation(location.id)}
+                                    className="text-gray-600 hover:text-blue-600"
+                                    >
+                                    <EyeIcon className="w-6 h-6" />
+                                    </button>
+                                    <button
+                                    type="button"
+                                    onClick={() => getLocation(location.id)}
+                                    className="text-gray-600 hover:text-green-600"
+                                    >
+                                    <PencilIcon className="w-6 h-6" />
+                                    </button>
+                                    <button
+                                    type="button" 
+                                    className="text-gray-600 hover:text-red-600"
+                                    >
+                                    <TrashBinIcon className="w-6 h-6" />
+                                    </button>
+                                </div>
+                                </td>
+                            </tr>
+                            ))}
+                        </tbody>
+                        </table>
+                    ) : (
+                        <p className="p-4 text-sm text-gray-500">No Location Found</p>
+                    )}
+                    </div>
             </div>
+
+  
 
             <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
                 <div className="relative w-full p-4 overflow-y-auto bg-white no-scrollbar rounded-3xl dark:bg-gray-900 lg:p-11">
