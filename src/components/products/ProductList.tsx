@@ -399,8 +399,10 @@ export default function ProductList(  ) {
                 <div> 
                   <Label>Capital Price</Label>
                   <Input 
-                    type="number"  
-                    onChange={(e) => setNewProduct({ ...newProduct, cptPrice:Number(e.target.value)  })}
+                    type="number" 
+                    min="0" 
+                    step={0.01}
+                    onChange={(e) => setNewProduct({ ...newProduct, cptPrice:parseFloat(e.target.value)  })}
                     defaultValue={newProduct.cptPrice} />
                 </div>
 
@@ -408,15 +410,19 @@ export default function ProductList(  ) {
                   <Label>Wholesale Price</Label>
                   <Input 
                     type="number"  
-                    onChange={(e) => setNewProduct({ ...newProduct, wlprice: Number(e.target.value) })}
-                    defaultValue={newProduct.wlprice} />
+                    min="0" 
+                    step={0.01}
+                    onChange={(e) => setNewProduct({ ...newProduct, wlprice: parseFloat(e.target.value) })}
+                    defaultValue={newProduct.wlprice} /> 
                 </div>
 
                 <div>
-                  <Label>SRP Price</Label>
+                  <Label>SRP Price</Label> 
                   <Input 
                     type="number"  
-                    onChange={(e) => setNewProduct({ ...newProduct, srpPrice: Number(e.target.value) })}
+                    min="0" 
+                    step={0.01}
+                    onChange={(e) => setNewProduct({ ...newProduct, srpPrice: parseFloat(e.target.value) })}
                     defaultValue={newProduct.srpPrice} />
                 </div>
               </div>
