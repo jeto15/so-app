@@ -20,9 +20,7 @@ import Label from "../form/Label";
 
 import {EyeIcon } from "@/icons";
 import SupplierInput from "../customs/SupplierInputs";
-
  
-
  
 type ProductObj = {
   Id: string;  // Ensure this matches your actual API response
@@ -44,7 +42,7 @@ export default function InventorylistPerLocaitons() {
   const searchParams = useSearchParams();
   const locId = searchParams?.get('id') ?? 'default-id'; // Fallback to a default value if 'id' is null
   const [products, setProducts] = useState([]);   
-  const { isOpen, openModal, closeModal } = useModal();
+  const { isOpen,  closeModal } = useModal();
   const [selectedItems, setSelectedItems] = useState<ProductObj[]>([]);
   const [actiontype, setActionType] = useState(String);
   const [supplierId, setSupplierId] = useState(String);
@@ -53,15 +51,35 @@ export default function InventorylistPerLocaitons() {
   const [sale_price, setSale_price] = useState<Record<number, number>>({});
   const [customerName, setCustomerName] = useState('');
   const [stockInReason, setStockInReason] = useState('');
+  const [showLeft, setShowLeft] = useState(true);
 
   const [transactoinError, setTransactionError] = useState(String);
- 
 
-  const [selectedAction, setSelectedAction] = useState('');
+  const [active, setActive] = useState('Purchase');
 
-  const handleActionChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedAction(event.target.value);
-  };
+  const buttons = [
+    {
+      label: 'Purchase',
+      bg: 'bg-blue-600',
+      hover: 'hover:bg-blue-700',
+    },
+    {
+      label: 'Sale',
+      bg: 'bg-green-600',
+      hover: 'hover:bg-green-700',
+    },
+    {
+      label: 'Stock In',
+      bg: 'bg-yellow-500',
+      hover: 'hover:bg-yellow-600',
+    },
+    {
+      label: 'Stock Out',
+      bg: 'bg-red-500',
+      hover: 'hover:bg-red-600',
+    },
+  ];
+
  
 
   useEffect(() => { 
@@ -73,8 +91,8 @@ export default function InventorylistPerLocaitons() {
       try { 
 
         const response = await axios.get("/api/inventoryregistry",{ params: { searchKey , locId  }});
- 
-        setProducts(response.data); 
+      //  setActionType('Purchase');
+        setProducts(response.data);  
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -84,58 +102,12 @@ export default function InventorylistPerLocaitons() {
   const handleSearchProduct = (keyword: React.ChangeEvent<HTMLInputElement>) => {   
     fetchProducts( keyword.target.value.toLowerCase() ,parseInt(locId));
   } 
-
-  
-  // const getProduct =  (id: number) => {
-  //   try { 
-
-  //     if (!filteredProducts || filteredProducts.length === 0) {
-  //       console.error('filteredProducts is empty or undefined');
-  //       return;
-  //     }
-
-  
-  //     const ProdID = id; 
-  //     const result = filteredProducts.filter(resProd =>  (resProd as ProductObj).InventoryID === ProdID);
-
-  //     if (result.length === 0) {
-  //       console.error('No matching product found');
-  //       return; 
-  //     }
-  
-
-  //     const prodItems = { 
-  //       Id: ProdID,
-  //       productName: result[0].product_details ?? '',
-  //       productCode: result[0].product_code ?? '',
-  //       productCategory: result[0].product_category ?? '',
-  //       cptPrice: result[0].product_cpt_price ?? 0,
-  //       wlprice: result[0].product_ws_price ?? 0,
-  //       srpPrice: result[0].product_price ?? 0
-  //     };
-      
-  //     console.log(prodItems); 
-  //   //  setNewProduct(prodItems);  
-  //   } catch (error) {
-  //     console.error('Error deleting product:', error);
-  //   }
-  // };
-  
-
-  // const handleSelect = (item: ProductObj) => {
  
-
-  //   const alreadySelected = selectedItems.find((i) => i.Id === item.Id);
-  //   if (!alreadySelected) {
-  //     setSelectedItems([...selectedItems, item]);
-  //   }
-  
-     
-  // };
-
   const handleSelect = (product: ProductObj) => {
     const isAlreadySelected = selectedItems.some(item => item.InventoryID === product.InventoryID);
-  
+
+    
+
     if (isAlreadySelected) {
       // Deselect: remove from selectedItems
       setSelectedItems(selectedItems.filter(item => item.InventoryID !== product.InventoryID));
@@ -150,65 +122,221 @@ export default function InventorylistPerLocaitons() {
  
   };
  
-
- 
   const handlSaveTransaction = async ( ) => { 
     try{ 
+
+        const now = new Date();
+        const prefix = 'TXN'
+        const datePart = now.toISOString().slice(0, 10).replace(/-/g, ""); // YYYYMMDD
+        const randomPart = Math.floor(10000 + Math.random() * 90000); // random 5-digit number
+   
+        const tran_number =  `${prefix}-${datePart}-${randomPart}`; 
         let descriptions  = '';
         let supId = '';
-        let apiRequstString = '';
-        if( actiontype === 'Stock Out' ){
-          descriptions =  stockInReason+' '+'Manual Stockout Entry';
-          apiRequstString = '/api/transaction/sales';
-        }
-        if( actiontype === 'Stock In' ){
-          descriptions =  stockInReason+' '+'Manual Stockin Entry';
-          apiRequstString = '/api/transaction/purchase';
-        }
-        
-        
-        if( actiontype === 'Sale' ){ 
-          descriptions =  stockInReason+' '+'Selling Stockin Entry';
-          apiRequstString = '/api/transaction/sales';
-        }
-
-        if( actiontype === 'Purchase' ){
+        let apiRequstString = '';  
   
-          supId = supplierId;
-          descriptions =  stockInReason+' '+'Purchasing Stockin Entry';
-          apiRequstString = '/api/transaction/purchase';
-        }
-
-        
-
-        const selectedList = selectedItems
-        .map((product) => (
-          { 
-            ...product, 
-            description: descriptions, 
-            supplierId: supId,
-            productId: product.Id,  
-            customername: customerName, 
-            quantity: quantities[parseInt(product.Id)] || 0,
-            sale_price: sale_price[parseInt(product.Id)] || 0,
-          }
-        )).filter((item) => item.quantity > 0); 
-
-        if( apiRequstString != '' ){
-          await axios.post(apiRequstString, selectedList);   
-
-          alert('Tansaction '+actiontype+' Complete!');
-        }
+        supId = supplierId;
     
-        setSelectedItems([]);
 
-        fetchProducts( '', parseInt(locId) );  
+          /*
+          Example req.body:
+          {
+            transaction: {
+              transaction_type: 'Purchase',
+              location_id: 1,
+              description: 'Supplier delivery #5678',
+              supplier_id: 123
+            },
+            lines: [
+              { productId: 10, quantity: 5, unit_cost: 12.0 },
+              { productId: 15, quantity: 3, unit_cost: 8.5 }
+            ]
+          }
+          */
+                      
+        if(actiontype === 'Purchase' ){
 
-        setActionType('');
+          descriptions =  stockInReason+' Supplier delivery #'+tran_number;
+          apiRequstString = '/api/transaction/transaction_purchase';
 
-        setStockInReason(''); 
+          const selectedList = selectedItems
+          .map((product) => (
+            { 
+              ...product, 
+              productId: product.Id,   
+              quantity: quantities[parseInt(product.Id)] || 0,
+              sale_price: sale_price[parseInt(product.Id)] || 0,
+            }
+          )).filter((item) => item.quantity > 0); 
 
-        closeModal(); 
+          const  transactions_payload = {
+            transaction: {
+              transaction_type: actiontype,
+              location_id: locId,
+              description: descriptions,
+              supplier_id: supId
+            },
+            lines : selectedList
+          } 
+  
+          if( apiRequstString != '' ){
+            await axios.post(apiRequstString, transactions_payload);   
+
+            alert('Tansaction '+actiontype+' Complete!');
+          } 
+
+        }
+      
+
+        /*
+        Example req.body:
+        {
+          transaction: {
+            transaction_type: 'Sale',
+            location_id: 1,
+            description: 'Customer Order #1234',
+            customername: 'John Doe',
+          },
+          lines: [
+            { productId: 10, quantity: 2, sale_price: 15.5 },
+            { productId: 11, quantity: 1, sale_price: 10 }
+          ]
+        }
+        */
+
+        if(actiontype === 'Sale' ){
+           
+          descriptions = stockInReason+ 'Customer Order #'+tran_number;
+       
+          apiRequstString = '/api/transaction/transaction_sales';
+
+          const selectedList = selectedItems
+          .map((product) => (
+            { 
+              ...product, 
+              productId: product.Id,  
+              quantity: quantities[parseInt(product.Id)] || 0,
+              sale_price: sale_price[parseInt(product.Id)] || 0,
+            }
+          )).filter((item) => item.quantity > 0); 
+
+          const  transactions_payload = {
+            transaction: {
+              transaction_type: actiontype,
+              location_id: locId,
+              description: descriptions,
+              customername: customerName
+            },
+            lines : selectedList
+          } 
+  
+          if( apiRequstString != '' ){
+            await axios.post(apiRequstString, transactions_payload);   
+
+            alert('Tansaction '+actiontype+' Complete!');
+          } 
+
+        }
+
+        /*
+        Example req.body:
+        {
+          transaction: {
+            transaction_type: 'Stock In',
+            location_id: 1,
+            description: 'Manual stock entry',
+          },
+          lines: [
+            { productId: 10, quantity: 5 },
+            { productId: 15, quantity: 3 }
+          ]
+        }
+        */
+        if(actiontype === 'Stock In'){
+           
+          descriptions = 'Manual stock entry |'+stockInReason;
+       
+          apiRequstString = '/api/transaction/stock_in';
+
+          const selectedList = selectedItems
+          .map((product) => (
+            { 
+              ...product, 
+              productId: product.Id,   
+              quantity: quantities[parseInt(product.Id)] || 0
+            }
+          )).filter((item) => item.quantity > 0); 
+
+          const  transactions_payload = {
+            transaction: {
+              transaction_type: actiontype,
+              location_id: locId,
+              description: descriptions
+            },
+            lines : selectedList
+          } 
+  
+          if( apiRequstString != '' ){
+            await axios.post(apiRequstString, transactions_payload);   
+
+            alert('Tansaction '+actiontype+' Complete!');
+          } 
+ 
+        }
+
+        /*
+        Example req.body:
+        {
+          transaction: {
+            transaction_type: 'Stock Out',
+            location_id: 1,
+            description: 'Damaged goods removal',
+            customername: null
+          },
+          lines: [
+            { productId: 10, quantity: 2 },
+            { productId: 11, quantity: 1 }
+          ]
+        }
+        */
+        if(actiontype === 'Stock Out' ){
+           
+          descriptions = 'Damaged goods removal '+stockInReason;
+       
+          apiRequstString = '/api/transaction/stock_out';
+
+          const selectedList = selectedItems
+          .map((product) => (
+            { 
+              ...product, 
+              productId: product.Id,  
+              quantity: quantities[parseInt(product.Id)] || 0,
+            }
+          )).filter((item) => item.quantity > 0); 
+
+          const  transactions_payload = {
+            transaction: {
+              transaction_type: actiontype,
+              location_id: locId,
+              description: descriptions,
+              customername: ''
+            },
+            lines : selectedList
+          } 
+  
+          if( apiRequstString != '' ){
+            await axios.post(apiRequstString, transactions_payload);   
+
+            alert('Tansaction '+actiontype+' Complete!');
+          } 
+
+        }
+
+      
+        fetchProducts( '', parseInt(locId) );   
+        setStockInReason('');  
+        setActionType(actiontype);
+        setActive(actiontype);  
         setTransactionError(''); 
 
     } catch (error) {
@@ -226,7 +354,7 @@ export default function InventorylistPerLocaitons() {
        // setError('Failed to add product. Please try again.');
     }
   }
-
+  
   const handleQtyChange = (productId: number, qty: number): void => {
     setQuantities((prev) => ({
     ...prev,
@@ -240,38 +368,14 @@ export default function InventorylistPerLocaitons() {
     [productId]: saleprice,
     }));
   };
-  
-  
- 
-  const openModalStockIn =() =>{
-    setActionType("Stock In");
-    setTransactionError('');
-    setCustomerName('');
-    clearAllItemFields();
-    openModal();
-  }
+   
+  const handleClikTransaction = ( action_type : string ) =>{
 
-  const openModalStockOut =() =>{
-    setActionType("Stock Out");
+    setActionType(action_type);
+    setActive(action_type);
     setTransactionError('');
-    setCustomerName('');
-    clearAllItemFields();
-    openModal();
-
-  }
-
-  const openModalStockPurchase =() =>{
-    setActionType("Purchase");
-    setTransactionError('');
-    setCustomerName(''); 
-    clearAllItemFields();
-    openModal();
-  }
-  const openModalStockSales =() =>{
-    setActionType("Sale");
-    setTransactionError('');
-    clearAllItemFields();
-    openModal();
+    setCustomerName('');  
+    //clearAllItemFields();
 
   }
 
@@ -306,56 +410,7 @@ export default function InventorylistPerLocaitons() {
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
             Inventory Products 
           </h3> 
-        </div> 
-        <div>
-          <select
-            onChange={handleActionChange}
-            className="border p-2 rounded"
-            value={selectedAction}
-          >
-            <option value="">Select Action</option>
-            <option value="purchase">Purchase</option>
-            <option value="sale">Sell</option>
-            <option value="stock_in">Stock In</option>
-            <option value="stock_out">Stock Out</option>
-          </select>
-
-          {selectedAction === 'purchase' && (
-            <button
-              onClick={openModalStockPurchase}
-              className="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-2  py-1 text-sm bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 m-1"
-            >
-              Apply [{selectedItems.length}]
-            </button>
-          )}
-
-          {selectedAction === 'sale' && (
-            <button
-              onClick={openModalStockSales}
-              className="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-2  py-1 text-sm bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 m-1"
-            >
-              Apply  [{selectedItems.length}]
-            </button>
-          )}
-
-          {selectedAction === 'stock_in' && (
-            <button
-              onClick={openModalStockIn}
-              className="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-2  py-1 text-sm bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 m-1"
-            >
-              Apply  [{selectedItems.length}]
-            </button>
-          )}
-
-          {selectedAction === 'stock_out' && (
-            <button
-              onClick={openModalStockOut}
-              className="inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-2  py-1 text-sm bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300 m-1"
-            >
-              Apply  [{selectedItems.length}]
-            </button>
-          )}
-        </div>
+        </div>  
       </div>
       <div className="overflow-x-auto">
         <div className="d-flex">
@@ -369,6 +424,23 @@ export default function InventorylistPerLocaitons() {
         </div>    
       </div> 
       <div className="max-w-full overflow-x-auto">
+
+       
+
+           {/* Toggle Button */}
+      <div className="mb-4">
+        <button
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          onClick={() => setShowLeft(!showLeft)}
+        >
+          {showLeft ? 'Hide Product List' : 'Show Product List'}
+        </button>
+      </div>
+
+      <div className="flex gap-4">
+        {/* Left Column – Product List */}
+        {showLeft && (
+        <div className="w-[700px] bg-white p-4 rounded shadow transition-all">
         <Table>
           {/* Table Header */}
           <TableHeader className="border-gray-100 dark:border-gray-800 border-y">
@@ -470,6 +542,183 @@ export default function InventorylistPerLocaitons() {
 
           </TableBody>
         </Table>
+        </div>
+        )}
+
+        {/* Right Column – Selected Items Table */}
+        <div className={`${showLeft ? 'w-1/2' : 'w-full'} bg-white p-4 rounded shadow transition-all`} >
+          <div className="flex flex-wrap gap-4 p-4">
+            {buttons.map((btn) => {
+              const isActive = active === btn.label;
+              const activeStyles = isActive
+                ? 'ring-4 ring-offset-2 ring-white scale-125'
+                : '';
+
+              return (
+                <button
+                  key={btn.label}
+                  onClick={() => handleClikTransaction(btn.label)}
+                  className={`text-white font-bold py-2 px-4 rounded shadow transform transition-all duration-200 ${btn.bg} ${btn.hover} ${activeStyles}`}
+                >
+                  {btn.label}
+                </button>
+              );
+            })}
+          </div>
+          <div className="no-scrollbar relative w-full max-w-[1000px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
+            
+            <div className="px-2 pr-14">
+              <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
+                {actiontype}
+              </h4>
+              {transactoinError && <div className="text-red-500 mt-2">{transactoinError}</div>}
+            </div>
+
+            <div className="flex flex-col">
+              <div className="custom-scrollbar px-1 pb-3">
+
+                {actiontype === 'Purchase' && (
+                  <div className="mt-7">
+                    <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
+                      <div className="col-span-2 lg:col-span-1">
+                        <Label>Supplier is?</Label>
+                        <SupplierInput
+                          onChange={(selectedSupplier) => {
+                            setSupplierId(selectedSupplier.id.toString());
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {actiontype === 'Sale' && (
+                  <div className="mt-7">
+                    <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
+                      <div className="col-span-2 lg:col-span-1">
+                        <Label>Customer Name?</Label>
+                        <Input
+                          type="text"
+                          placeholder="Enter Customer Name"
+                          className="form-control mb-3"
+                          onChange={handleEnterCustomer}
+                          defaultValue={customerName}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="mt-7">
+                  <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
+                    <div className="col-span-2 lg:col-span-1">
+                      <Label>Descriptions</Label>
+                      <Input
+                        type="text"
+                        placeholder="Example: Note, Reason or Label"
+                        className="form-control mb-3"
+                        onChange={handleEnterStockInReason}
+                        defaultValue={stockInReason}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            {/* Table Section */}
+            <div className="flex flex-col">
+              <div className="w-full overflow-auto max-w-full max-h-[50vh] sm:max-h-[60vh] lg:max-h-[70vh]">
+                <div className="min-w-[600px] lg:min-w-full">
+                  <Table className="table-auto w-full border-collapse">
+                    <thead className="bg-gray-100 dark:bg-gray-800 sticky top-0 z-10">
+                      <tr>
+                        <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Category</th>
+                        <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Product</th>
+                        {(actiontype === 'Sale' || actiontype === 'Purchase') && (
+                          <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Price</th>
+                        )}
+                        <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Qty</th>
+                        <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Actions</th>
+                      </tr>
+                    </thead>
+                    <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
+                      {selectedItems.length > 0 ? (
+                        selectedItems.map((product) => (
+                          <TableRow key={product.Id} className="text-sm">
+                            <TableCell className="py-1 px-2 text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                              {product.product_category}
+                            </TableCell>
+                            <TableCell className="py-1 px-2 text-gray-500 dark:text-gray-400">
+                              [{product.product_code}] {product.product_details} | SRP: {product.product_price}
+                            </TableCell>
+                            {(actiontype === 'Sale' || actiontype === 'Purchase') && (
+                              <TableCell className="py-1 px-2 text-gray-500 dark:text-gray-400">
+                              <input
+                                  type="number"
+                                  min={0}
+                                  step="0.01"
+                                  placeholder="Enter Price: 0.00"
+                                  className="border px-2 py-1 w-full max-w-[120px] rounded text-sm"
+                                  value={sale_price[parseFloat(product.Id)] || ''}
+                                  onChange={(e) =>
+                                    handleSalePriceChange(parseInt(product.Id), parseFloat(e.target.value || '0'))
+                                  }
+                                />  
+                          
+                              </TableCell>
+                            )}
+                            <TableCell className="py-1 px-2 text-gray-500 dark:text-gray-400">
+                              <input
+                                type="number"
+                                min={0}
+                                placeholder="QTY"
+                                className="border px-2 py-1 w-full max-w-[80px] rounded text-sm"
+                                value={quantities[parseInt(product.Id)] || ''}
+                                onChange={(e) =>
+                                  handleQtyChange(parseInt(product.Id), parseInt(e.target.value || '0', 10))
+                                }
+                              />
+                            </TableCell>
+                            <TableCell className="py-1 px-2 text-gray-500 dark:text-gray-400">
+                              <button
+                                onClick={() => handleRemove(product.Id)}
+                                className="inline-flex items-center px-2 py-1 rounded bg-red-100 text-red-600 text-xs font-medium hover:bg-red-200"
+                              >
+                                Remove
+                              </button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={5} className="text-center py-4 text-sm text-gray-500">
+                            No products found
+                          </td>
+                        </tr>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+
+              {selectedItems.length > 0 && (
+                <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
+                  <Button size="sm" variant="outline" onClick={clearAllItemFields}>
+                    Clear Fields
+                  </Button>
+                  <Button size="sm" onClick={handlSaveTransaction}>
+                    [ {actiontype} ]Save Changes 
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+
       </div>
       <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[1000px] m-4">
       <div className="no-scrollbar relative w-full max-w-[1000px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
@@ -481,143 +730,7 @@ export default function InventorylistPerLocaitons() {
           {transactoinError && <div className="text-red-500 mt-2">{transactoinError}</div>}
         </div>
 
-        <div className="flex flex-col">
-          <div className="custom-scrollbar px-1 pb-3">
-
-            {actiontype === 'Purchase' && (
-              <div className="mt-7">
-                <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                  <div className="col-span-2 lg:col-span-1">
-                    <Label>Supplier is?</Label>
-                    <SupplierInput
-                      onChange={(selectedSupplier) => {
-                        setSupplierId(selectedSupplier.id.toString());
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {actiontype === 'Sale' && (
-              <div className="mt-7">
-                <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                  <div className="col-span-2 lg:col-span-1">
-                    <Label>Customer Name?</Label>
-                    <Input
-                      type="text"
-                      placeholder="Enter Customer Name"
-                      className="form-control mb-3"
-                      onChange={handleEnterCustomer}
-                      defaultValue={customerName}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="mt-7">
-              <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                <div className="col-span-2 lg:col-span-1">
-                  <Label>Descriptions</Label>
-                  <Input
-                    type="text"
-                    placeholder="Example: Note, Reason or Label"
-                    className="form-control mb-3"
-                    onChange={handleEnterStockInReason}
-                    defaultValue={stockInReason}
-                  />
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        {/* Table Section */}
-        <div className="flex flex-col">
-          <div className="w-full overflow-auto max-w-full max-h-[50vh] sm:max-h-[60vh] lg:max-h-[70vh]">
-            <div className="min-w-[600px] lg:min-w-full">
-              <Table className="table-auto w-full border-collapse">
-                <thead className="bg-gray-100 dark:bg-gray-800 sticky top-0 z-10">
-                  <tr>
-                    <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Category</th>
-                    <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Product</th>
-                    {(actiontype === 'Sale' || actiontype === 'Purchase') && (
-                      <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Price</th>
-                    )}
-                    <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Qty</th>
-                    <th className="px-2 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Actions</th>
-                  </tr>
-                </thead>
-                <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {selectedItems.length > 0 ? (
-                    selectedItems.map((product) => (
-                      <TableRow key={product.Id} className="text-sm">
-                        <TableCell className="py-1 px-2 text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                          {product.product_category}
-                        </TableCell>
-                        <TableCell className="py-1 px-2 text-gray-500 dark:text-gray-400">
-                          [{product.product_code}] {product.product_details} | SRP: {product.product_price}
-                        </TableCell>
-                        {(actiontype === 'Sale' || actiontype === 'Purchase') && (
-                          <TableCell className="py-1 px-2 text-gray-500 dark:text-gray-400">
-                            <input
-                              type="number"
-                              placeholder="Enter Price: 0.00"
-                              className="border px-2 py-1 w-full max-w-[120px] rounded text-sm"
-                              value={sale_price[parseInt(product.Id)] || ''}
-                              onChange={(e) =>
-                                handleSalePriceChange(parseInt(product.Id), parseInt(e.target.value || '0', 10))
-                              }
-                            />
-                          </TableCell>
-                        )}
-                        <TableCell className="py-1 px-2 text-gray-500 dark:text-gray-400">
-                          <input
-                            type="number"
-                            min={0}
-                            placeholder="QTY"
-                            className="border px-2 py-1 w-full max-w-[80px] rounded text-sm"
-                            value={quantities[parseInt(product.Id)] || ''}
-                            onChange={(e) =>
-                              handleQtyChange(parseInt(product.Id), parseInt(e.target.value || '0', 10))
-                            }
-                          />
-                        </TableCell>
-                        <TableCell className="py-1 px-2 text-gray-500 dark:text-gray-400">
-                          <button
-                            onClick={() => handleRemove(product.Id)}
-                            className="inline-flex items-center px-2 py-1 rounded bg-red-100 text-red-600 text-xs font-medium hover:bg-red-200"
-                          >
-                            Remove
-                          </button>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={5} className="text-center py-4 text-sm text-gray-500">
-                        No products found
-                      </td>
-                    </tr>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-
-          {selectedItems.length > 0 && (
-            <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
-              <Button size="sm" variant="outline" onClick={closeModal}>
-                Add More
-              </Button>
-              <Button size="sm" onClick={handlSaveTransaction}>
-                [ {actiontype} ]Save Changes 
-              </Button>
-            </div>
-          )}
-        </div>
+ 
       </div>
     </Modal>
 
