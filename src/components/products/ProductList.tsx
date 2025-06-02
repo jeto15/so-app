@@ -104,8 +104,7 @@ export default function ProductList(  ) {
   };
 
   const fetchProducts = async ( searchKey = "" ) => {
-      try { 
-        console.log('viewMode', viewMode); 
+      try {  
         const response = await axios.get("/api/products",{ params: { searchKey , viewMode  }});
        
         setProducts(response.data); 

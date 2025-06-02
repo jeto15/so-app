@@ -14,36 +14,19 @@ const getThisWeekRange = (): [Date, Date] => {
   return [start, end];
 };
 
-interface Purchase {
-  purchaseId: number;
-  product_id: number;
-  inventory_id: number;
-  location_id: number;
-  supplier_id: number;
-  supplierName: string;
-  description: string;
-  quantity: number;
-  unit_cost: number;
-  purchase_date: string;
-  contact_info: string;
-  product_details: string;
-  product_code: string;
-  location_name: string;
-}
+ 
+ 
 
-interface Sale {
-  saleId: number;
-  inventory_id: number;
-  product_id: number;
+interface TransactionsHeader {
+  id : number;
+  transaction_type: string;
   location_id: number;
-  quantity: number;
+  transaction_date: string;
   description: string;
-  sale_date: string;
-  sale_price: number;
-  customer: string; 
-  product_details: string;
-  product_code: string; 
-  location_name: string;
+  customer_name: string;
+  supplier_id: number;
+  location_name: string; 
+  address:string;
 }
 
 interface Transaction {
@@ -55,11 +38,8 @@ interface Transaction {
 export default function Ecommerce() {
   const [fromDate, setFromDate] = useState<Date | null>(getThisWeekRange()[0]);
   const [toDate, setToDate] = useState<Date | null>(getThisWeekRange()[1]);
-  const [purchaseTransactionsTransform, setPurchaseTransactionsTransform] = useState<Transaction[]>([]);
-  const [salesTransactionsTransform, setSalesTransactionsTransform] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [showSales, setShowSales] = useState(true);
-  const [showPurchases, setShowPurchases] = useState(true);
+  const [transactionHeadersActivity, setTransactionHeadersActivity] = useState<Transaction[]>([]); 
+  const [loading, setLoading] = useState(false); 
 
   // const topSellingProducts = [
   //   { name: 'Product A', sales: 1200 },
@@ -88,27 +68,16 @@ export default function Ecommerce() {
         },
       });
 
-      const { purchases, sales } = response.data;
+      const { transactions } = response.data;
 
-      const mappedTransactionsPurchase = purchases.map((transaction: Purchase) => ({
-        description: '['+transaction.product_code+']'+transaction.product_details +'| '+ transaction.description+': '+transaction.quantity+'| Where at '+ transaction.location_name,
-        date: transaction.purchase_date, // Format the date if necessary
+      const mappedTransactionsPurchase = transactions.map((transaction: TransactionsHeader) => ({
+        description: transaction.description +' | Where at '+ transaction.location_name,
+        date: transaction.transaction_date, // Format the date if necessary
         type: 'purchase', // Ensure this is either 'sale' or 'purchase'
       }));
 
-      const mappedTransactionsSale = sales.map((transaction: Sale) => ({
-        description: '['+transaction.product_code+']'+transaction.product_details +'| '+ transaction.description+': '+transaction.quantity+'| Where at '+ transaction.location_name,
-        date: transaction.sale_date, // Format the date if necessary
-        type: 'sale', // Ensure this is either 'sale' or 'purchase'
-      }));
-   
-
-      setPurchaseTransactionsTransform(mappedTransactionsPurchase || []);
-      setSalesTransactionsTransform(mappedTransactionsSale || []);
-  //    setSalesTransactions(sales || []);
-
-      // console.log('Purchases:', purchases);
-      // console.log('Sales:', sales);
+  
+      setTransactionHeadersActivity(mappedTransactionsPurchase || []); 
     } catch (error) {
       console.error('Failed to fetch transactions:', error);
     } finally {
@@ -139,42 +108,15 @@ export default function Ecommerce() {
             {loading ? 'Loading...' : 'Run'}
           </button>
 
-            
-            {/* Sales Accordion */}
-      <div className="border rounded shadow">
-        <button
-          onClick={() => setShowSales(!showSales)}
-          className="w-full text-left px-4 py-2 bg-blue-100 hover:bg-blue-200 font-medium text-sm"
-        >
-          {showSales ? '▼' : '▶'} Sale & Stock-out Transactions
-        </button>
-        {showSales && (
-          <div className="p-4">
-            <TransactionColumn
-              title=""
-              transactions={salesTransactionsTransform}
-            />
-          </div>
-        )}
-      </div>
+  
 
-      {/* Purchase Accordion */}
-      <div className="border rounded shadow">
-        <button
-          onClick={() => setShowPurchases(!showPurchases)}
-          className="w-full text-left px-4 py-2 bg-green-100 hover:bg-green-200 font-medium text-sm"
-        >
-          {showPurchases ? '▼' : '▶'} Purchase & Stock-in Transactions
-        </button>
-        {showPurchases && (
-          <div className="p-4">
-            <TransactionColumn
-              title=""
-              transactions={purchaseTransactionsTransform}
-            />
-          </div>
-        )}
-      </div>
+          <TransactionColumn
+            title="" 
+            transactions={transactionHeadersActivity}
+          />
+      
+        
+       
         </div>
       </div>
     </div>
