@@ -2,9 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-
-import Purchase_Table from "../pruchase/Purchase_Table";
-import Sale_Table from "../sale/Sale_Table";
+ 
 import { useRouter } from 'next/navigation';
  
 import {  EyeIcon } from "@/icons";
@@ -24,33 +22,23 @@ interface LocRecordData {
 }
 
 
-type PurchaseRecord = {
-  purchaseId: number;
-  product_id: number;
-  inventory_id: number;
-  location_id: number;
-  supplier_id: number;
-  supplierName: string;
-  description: string;
-  quantity: number;
-  unit_cost: number; 
-  purchase_date: string;
-  contact_info: string;
-};
-
+ 
 
  
-type SaleRecord = {
-  inventory_id: number;
-  product_id: number;
-  location_id: number;
-  saleId: number; 
-  description: string;
-  customer: string; 
-  quantity: number; 
-  sale_date: string; 
-  sale_price: number;
-};
+type TransactionRecord = {
+  customer_name : string;
+  description : string;
+  id : number;
+  location_id : number;
+  product_id : number;
+  quantity : number;
+  supplier_id : number;
+  transaction_date : string;
+  transaction_header_id : number;
+  transaction_type : string;
+  unit_price : number;
+  supplier_name : string;
+}
 
  
 
@@ -59,38 +47,21 @@ const LocationTransaction: React.FC<LocationTransaction> = ({ recordId ,  produc
 
   const [record, setRecord] = useState<LocRecordData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [purchasesList, setPurchasesList] = useState([]);   
-  const [saleList, setSaleList] = useState([]);   
+  const [loading, setLoading] = useState<boolean>(true); 
+  const [transactionHistory, setTransactionHistory] = useState([]);
 
- 
-
-  const fetchPurchaseRecord = async (recordId = "", productId = "") => {
+  const getTransactionHistoryRecord = async (recordId = "", productId = "") => {
     try {
-      const response = await axios.get("/api/transaction/get/purchaseperprod", {
+      const response = await axios.get("/api/transaction/get/transaction_per_product", {
         params: { recordId, productId },
       });
  
-      setPurchasesList(response.data);
+      setTransactionHistory(response.data);
     } catch (error) {
       console.error("Failed to fetch purchase record:", error);
     }
   }; 
-
-  
-  const fetchSaleRecord = async (recordId = "", productId = "") => {
-    try {
-      const response = await axios.get("/api/transaction/get/saleperprod", {
-        params: { recordId, productId },
-      });
-      console.log('response.data',response.data);
-      setSaleList(response.data);
-    } catch (error) {
-      console.error("Failed to fetch purchase record:", error);
-    } 
-  }; 
-
-  
+ 
   const viewLocation = (id: string) => {
     try {
          
@@ -100,7 +71,7 @@ const LocationTransaction: React.FC<LocationTransaction> = ({ recordId ,  produc
         console.error('Error deleting product:', error);
     }
 
-}
+  }
 
 
 
@@ -127,19 +98,15 @@ const LocationTransaction: React.FC<LocationTransaction> = ({ recordId ,  produc
   
  
     fetchRecord();
-    fetchPurchaseRecord(recordId,productId);
-    fetchSaleRecord(recordId,productId);
+    getTransactionHistoryRecord(recordId,productId); 
 
   }, [recordId,productId]);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p style={{ color: 'red' }}>{error}</p>;
   if (!record) return <p>No record found.</p>;
-
-
-
-  const fetchPurchaseRecords: PurchaseRecord[] = purchasesList;
-  const fetchSaleRecords: SaleRecord[] = saleList;
+ 
+  const fetTransactionRecords: TransactionRecord[] = transactionHistory;
 
   
   return (
@@ -171,38 +138,48 @@ const LocationTransaction: React.FC<LocationTransaction> = ({ recordId ,  produc
          
         </div> */}
       </div>
-  
 
-      <div className="flex flex-col md:flex-row gap-4 p-6 pt-1 bg-gray-100 ">
-        {/* Left: Location Details */}
-        <div className="md:w-1/2 bg-white shadow-lg rounded-2xl p-6 space-y-4"> 
-          <div className='mt-[5%]' >
-                {/* Left Column Table */}
-                <div className="overflow-auto">
-                  <Purchase_Table records={fetchPurchaseRecords} />
-                </div>
-        
-            </div> 
-        </div>
-
-        {/* Right: Quantity Card */}
-        <div className="md:w-1/2 bg-white shadow-lg rounded-2xl p-6 space-y-4"> 
- 
-        
-            <div className='mt-[5%]'>
-                {/* Left Column Table */}
-                <div className="overflow-auto">   
-                <Sale_Table records={fetchSaleRecords} />
-                </div>
-        
-            </div>
-        </div>
-        
-        {/* <div className="md:w-1/2 flex items-center justify-center">
-         
-        </div> */}
+      <div className="mt-4">
+        <h2 className="text-xl font-semibold mb-2">Transaction History</h2>
+          <div className="overflow-x-auto">
+            <table className="min-w-full border text-xs text-left">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="border px-3 py-1">Date</th>
+                  <th className="border px-3 py-1">Type</th> 
+                  <th className="border px-3 py-1">Customer/Supplier</th>
+                  <th className="border px-3 py-1">Description</th>
+                  <th className="border px-3 py-1">Qty</th>
+                  <th className="border px-3 py-1">Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                {fetTransactionRecords.map((trans) => (
+                  <tr key={trans.id} className="border-t">
+                    <td className="border px-3 py-1 whitespace-nowrap">
+                      {new Intl.DateTimeFormat('en-PH', {
+                        timeZone: 'Asia/Manila',
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true,
+                      }).format(new Date(trans.transaction_date))}
+                    </td>
+                    <td className="border px-3 py-1">{trans.transaction_type}</td> 
+                    <td className="border px-3 py-1">{trans.customer_name} {trans.supplier_name}</td>
+                    <td className="border px-3 py-1">{trans.description}</td>
+                    <td className="border px-3 py-1">
+                      {trans.quantity}
+                    </td>
+                    <td className="border px-3 py-1">{trans.unit_price}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
       </div>
-  
     </div>
  
     </>
