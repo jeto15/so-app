@@ -8,7 +8,7 @@ import mysql from "mysql2/promise";
 // });
 
 const db = mysql.createPool({
-    host: '167.88.44.199', // MySQL VPS IP address
+    host: 'localhost', // MySQL VPS IP address
     user: 'admin', // Your MySQL username
     password: 'Jetcom123!@#', // Your MySQL password
     database: 'stvno' // Your MySQL database name
