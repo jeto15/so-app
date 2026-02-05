@@ -8,11 +8,16 @@ import mysql from "mysql2/promise";
 // });
 
 const db = mysql.createPool({
-    host: 'localhost', // MySQL VPS IP address
-    user: 'admin', // Your MySQL username
-    password: 'Jetcom123!@#', // Your MySQL password
-    database: 'stvno' // Your MySQL database name
+  host: "127.0.0.1",
+  user: "admin",
+  password: "Jetcom123!@#",
+  database: "stvno",
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
 });
+
+console.log('hello jet', db);
 
 export default db;
  
