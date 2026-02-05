@@ -33,6 +33,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         res.status(200).json({ token });
     } catch (error) {
-        res.status(500).json({ message: "Server error", error });
+        console.error("LOGIN ERROR:", err); // shows real error in PM2 logs
+
+            res.status(500).json({
+                message: "Server error",
+                error: err.message,
+                code: err.code
+            });
     }
 }
